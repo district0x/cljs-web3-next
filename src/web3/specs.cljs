@@ -5,6 +5,9 @@
 (s/def :web3/obj any?)
 (s/def :web3.block/number number?)
 
+;; TODO shape this
+(s/def :web3/block any?)
+(s/def :web3.tx/hash string?)
 (s/def :web3.opt/from-block :web3.block/number)
 
 ;; This event-type is only for allowing other kinds of events in
@@ -29,7 +32,11 @@
 (s/def :web3.contract/instance (s/keys :req-un [:web3/address
                                                 :web3/abi]
                                        :opt-un [:web3/binary]))
-
+(s/def :web3.filter/id keyword?)
 (s/def :web3.callback/on-result fn?)
 (s/def :web3.callback/on-error fn?)
 (s/def :web3.callback/on-progress fn?)
+
+(s/def :web3.callback/on-events-result fn? #_(s/fspec :args (s/cat :events (s/coll-of :web3/event))))
+(s/def :web3.callback/on-event-result fn? #_(s/fspec :args (s/cat :event :web3/event)))
+(s/def :web3.callback/on-tx-receipt fn? #_(s/fspec :args (s/cat :result any?)))

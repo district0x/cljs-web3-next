@@ -1,16 +1,28 @@
 (ns web3.impl.ethers-js
-  (:require [web3.core :as web3-core]))
+  (:require [web3.core :as web3-core]
+            cljsjs.bignumber
+            [goog.string :as gstring]))
 
-(defrecord EthersJS [provider])
+(defrecord EthersJS [signer provider])
 
-(defn make-ethers-js [provider]
-  (->EthersJS provider))
+(defn ethers-js-bignumber? [x]
+  (= (aget x "_ethersType") "BigNumber"))
+
+(defn normalize-object [n]
+  (cond
+    (ethers-js-bignumber? n) (js/BigNumber. (.toString n))
+    :else n))
+
+(defn make-ethers-js [signer provider]
+  (->EthersJS signer provider))
 
 (defn- build-event [ev]
-  {:web3.block/number (-> ev .-blockNumber)
+  {:web3.block/number (normalize-object (-> ev .-blockNumber))
    :web3.event/data (let [oks (js/Object.keys (.-args ev))]
                       (reduce (fn [r k]
-                                (assoc r (keyword k) (aget (.-args ev) k)))
+                                (assoc r
+                                       (keyword k)
+                                       (normalize-object (aget (.-args ev) k))))
                               {} oks))
    :web3.event/name (-> ev .-event)
    :web3.event/signature (-> ev .-eventSignature)
@@ -23,7 +35,7 @@
   (-past-events [{:keys [provider] :as this}
                  contract-instance
                  {:keys [from-block] :as opts}
-                 {:keys [on-result on-progress on-error]}]
+                 {:keys [on-events-result on-progress on-error]}]
     (let [contract (new js/ethers.Contract
                         (web3-core/contract-address contract-instance)
                         (web3-core/contract-abi contract-instance) provider)
@@ -47,16 +59,20 @@
                                                  (println "Events downloaded" @finished?)
                                                  (.removeAllListeners contract "*")
                                                  (swap! all-evs conj (build-event ev))
-                                                 (on-result @all-evs))))))})))
+                                                 (on-events-result @all-evs))))))})))
 
-  (-on-new-event [{:keys [provider]} contract-instance _ {:keys [on-result on-error]}]
+  (-on-new-event [{:keys [provider]} contract-instance _ {:keys [on-event-result on-error]}]
     (let [ contract (new js/ethers.Contract
                         (web3-core/contract-address contract-instance)
                         (web3-core/contract-abi contract-instance) provider)]
 
       (.on contract "*"
            (fn [ev]
-             (on-result (build-event ev))))))
+             (on-event-result (build-event ev))))))
+
+  (-on-new-block [_ callback]
+    ;; TODO: Implement this
+    )
 
 
   web3-core/Blockchain
@@ -88,7 +104,23 @@
 
   web3-core/ContractExecution
 
-  (-call-constant [{:keys [provider contracts-map]} contract-key method args opts callbacks]
-    )
-  (-call-tx [{:keys [provider contracts-map]} contract-key method args opts callbacks]
-    ))
+  (-contract-call [{:keys [signer provider] :as web3} contract-instance method args opts {:keys [on-result
+                                                                                                 on-tx-receipt
+                                                                                                 on-error]}]
+    (println (gstring/format "Calling contract (%s)" (web3-core/contract-address contract-instance)))
+    (let [contract (new js/ethers.Contract
+                        (web3-core/contract-address contract-instance)
+                        (web3-core/contract-abi contract-instance)
+                        signer)
+          contract-method (aget contract (name method))]
+      (.then (apply contract-method args)
+             (fn [tx]
+               (println "Got tx hash " (.-hash tx))
+               (on-result {:tx-hash (.-hash tx)})
+               (if-let [wait-fn (.-wait tx)]
+                 (.then (wait-fn 1)
+                        (fn [receipt]
+                          (.log js/console "Got receipt " receipt)
+                          (on-tx-receipt {:events (.-events receipt)
+                                          :status (.-status receipt)})))
+                 (println "No wait fn in tx, assuming constant call")))))))

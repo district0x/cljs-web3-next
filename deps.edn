@@ -1,5 +1,8 @@
-{:deps {org.clojure/clojure {:mvn/version "1.9.0"}
-        org.clojure/clojurescript {:mvn/version "1.10.339"}}
+{:deps {org.clojure/clojure       {:mvn/version "1.9.0"}
+        org.clojure/clojurescript {:mvn/version "1.10.339"}
+        cljsjs/bignumber          {:mvn/version "4.1.0-0"}
+        district0x/bignumber      {:mvn/version "1.0.3"}
+        camel-snake-kebab         {:mvn/version "0.4.0"}}
  :paths ["src" "resources"]
  :aliases {:fig {:extra-deps
                   {com.bhauman/rebel-readline-cljs {:mvn/version "0.1.4"}
