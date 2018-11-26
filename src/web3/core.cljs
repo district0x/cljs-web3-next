@@ -13,8 +13,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defprotocol Events
-  (-past-events [_ contract-instance opts callbacks])
-  (-on-new-event [_ contract-instance opts callbacks])
+  (-on-event [_ contract-instance opts callbacks])
   (-on-new-block [_ callback])
   (-stop-listening [_ filter-id]))
 
@@ -41,38 +40,23 @@
 ;; Events ;;
 ;;;;;;;;;;;;
 
-(s/fdef past-events
+(s/fdef on-event
         :args (s/cat :web3 :web3/obj
                      :contract-instance :web3.contract/instance
-                     :opts (s/keys :req-un [:web3.opt/from-block]
-                                   :opt-un [:web3.opt/event-type])
-                     :callbacks (s/keys :req-un [:web3.callback/on-events-result]
-                                        :opt-un [:web3.callback/on-progress
-                                                 :web3.callback/on-error]))
-        :ret (s/keys :req-un [:web3.filter/id]))
-
-(defn past-events [web3 contract-instance opts callbacks]
-  (let [opts (-> opts
-                 (assoc :event-type (or (:event-type opts) :tx-log))
-                 (assoc :from-block (or (:from-block opts) 0)))]
-    (-past-events web3 contract-instance opts callbacks)))
-
-(s/fdef on-new-event
-        :args (s/cat :web3 :web3/obj
-                     :contract-instance :web3.contract/instance
-                     :opts (s/keys :opt-un [:web3.opt/event-type])
+                     :opts (s/keys :opt-un [:web3.opt/event-type
+                                            :web3.opt/from-block])
                      :callbacks (s/keys :req-un [:web3.callback/on-event-result]
                                         :opt-un [:web3.callback/on-error]))
         :ret (s/keys :req-un [:web3.filter/id]))
 
-(defn on-new-event [web3 contract-instance opts callbacks]
+(defn on-event [web3 contract-instance opts callbacks]
   (let [opts (-> opts
                  (assoc :event-type (or (:event-type opts) :tx-log)))]
-    (-on-new-event web3 contract-instance opts callbacks)))
+    (-on-event web3 contract-instance opts callbacks)))
 
 (s/fdef on-new-block
   :args (s/cat :web3 :web3/obj
-               :callback fn? #_(s/fspec :args (s/cat :block :web3/block)))
+               :callback (s/fspec :args (s/cat :block :web3/block)))
   :ret (s/keys :req-un [:web3.filter/id]))
 
 (defn on-new-block [web3 callback]
@@ -138,7 +122,9 @@
                                            :web3.callback/on-tx-receipt
                                            :web3.callback/on-error])))
 
-(defn contract-call [web3 contract-instance method args opts callbacks]
+(defn contract-call
+  "Call a smart contract method."
+  [web3 contract-instance method args opts callbacks]
   (-contract-call web3
                   contract-instance
                   method

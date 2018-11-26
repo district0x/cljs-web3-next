@@ -37,6 +37,6 @@
 (s/def :web3.callback/on-error fn?)
 (s/def :web3.callback/on-progress fn?)
 
-(s/def :web3.callback/on-events-result fn? #_(s/fspec :args (s/cat :events (s/coll-of :web3/event))))
-(s/def :web3.callback/on-event-result fn? #_(s/fspec :args (s/cat :event :web3/event)))
-(s/def :web3.callback/on-tx-receipt fn? #_(s/fspec :args (s/cat :result any?)))
+(s/def :web3.callback/on-events-result (s/fspec :args (s/cat :events (s/coll-of :web3/event))))
+(s/def :web3.callback/on-event-result (s/fspec :args (s/cat :event :web3/event)))
+(s/def :web3.callback/on-tx-receipt (s/fspec :args (s/cat :result any?)))

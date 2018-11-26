@@ -32,40 +32,13 @@
 
   web3-core/Events
 
-  (-past-events [{:keys [provider] :as this}
-                 contract-instance
-                 {:keys [from-block] :as opts}
-                 {:keys [on-events-result on-progress on-error]}]
-    (let [contract (new js/ethers.Contract
-                        (web3-core/contract-address contract-instance)
-                        (web3-core/contract-abi contract-instance) provider)
-          all-evs (atom [])
-          finished? (atom false)]
-      (web3-core/last-block-number this
-                                   {:on-result
-                                    (fn [lb]
-                                      (println "Downloading events, from block " from-block " to " lb)
-                                      (.resetEventsBlock provider from-block)
-                                      ;; asumes blocks come in order
-                                      (.on contract "*"
-                                           (fn [ev]
-                                             (if (< (.-blockNumber ev) lb)
-                                               (swap! all-evs conj (build-event ev))
-
-                                               ;; TODO: missing all the events from last block
-                                               ;; the problem is when to call the callback
-                                               (when-not @finished?
-                                                 (reset! finished? true)
-                                                 (println "Events downloaded" @finished?)
-                                                 (.removeAllListeners contract "*")
-                                                 (swap! all-evs conj (build-event ev))
-                                                 (on-events-result @all-evs))))))})))
-
-  (-on-new-event [{:keys [provider]} contract-instance _ {:keys [on-event-result on-error]}]
+  (-on-event [{:keys [provider]} contract-instance {:keys [from-block]} {:keys [on-event-result on-error]}]
     (let [ contract (new js/ethers.Contract
                         (web3-core/contract-address contract-instance)
                         (web3-core/contract-abi contract-instance) provider)]
-
+      (when from-block
+        (println "Reseting block to " from-block)
+        (.resetEventsBlock provider from-block))
       (.on contract "*"
            (fn [ev]
              (on-event-result (build-event ev))))))
