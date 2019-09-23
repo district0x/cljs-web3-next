@@ -4,6 +4,7 @@
 (defprotocol+ Web3Api
   (-http-provider [this uri])
   (-websocket-provider [this uri])
+  (-is-listening? [this provider])
   (-sha3 [this provider arg])
   (-solidity-sha3 [this provider args])
   (-contract-at [this provider abi address])
@@ -19,5 +20,6 @@
   (-unsubscribe [this subscription])
   (-clear-subscriptions [this provider])
   (-get-past-events [this contract-instance event opts & [callback]])
+
 
   )

@@ -10,6 +10,7 @@
     [district.server.logging]
     [district.server.smart-contracts :as smart-contracts ;;:refer [create-event-filter replay-past-events-in-order]
      ]
+    [district.shared.async-helpers :refer [safe-go <?]]
     [district.server.web3 :refer [web3]]
     [medley.core :as medley]
     [mount.core :as mount :refer [defstate]]
@@ -27,28 +28,27 @@
                        (:web3-events (mount/args))))
   :stop (stop web3-events))
 
-
-#_(defn register-callback! [event-key callback & [callback-id]]
+(defn register-callback! [event-key callback & [callback-id]]
   (let [[contract-key event] (if-not (= event-key ::after-past-events-dummy-key)
                                (get (:events @web3-events) event-key)
                                [::after-past-events-dummy-contract ::after-past-events-dummy-event])
-        callback-id (or callback-id (rand-int 999999999))]
+        callback-id (or callback-id (random-uuid))]
 
     (when-not contract-key
       (throw (js/Error. "Trying to register callback for non existing event " event-key)))
 
     (swap! (:callbacks @web3-events) (fn [callbacks]
                                        (-> callbacks
-                                         (assoc-in [contract-key event callback-id] callback)
-                                         (assoc-in [:callback-id->path callback-id] [contract-key event])))))
-  callback-id)
+                                           (assoc-in [contract-key event callback-id] callback)
+                                           #_(assoc-in [:callback-id->path callback-id] [contract-key event]))))
+    callback-id))
 
 
-#_(defn register-after-past-events-dispatched-callback! [callback]
+(defn register-after-past-events-dispatched-callback! [callback]
   (register-callback! ::after-past-events-dummy-key callback))
 
 
-#_(defn unregister-callbacks! [callback-ids]
+(defn unregister-callbacks! [callback-ids]
   (doseq [callback-id callback-ids]
     (let [path (get-in @(:callbacks @web3-events) [:callback-id->path callback-id])]
       (swap! (:callbacks @web3-events) (fn [callbacks]
@@ -82,17 +82,22 @@
                                               :file-path file-path})))))
 
 
-#_(defn dispatch [err {:keys [:contract :event] :as evt}]
+(defn dispatch [err {:keys [:contract :event] :as evt}]
+
+  #_(log/debug "web3-evt/dispatch" {:contract contract
+                                  ;; :event evt
+                                  :callbacks (get-in @(:callbacks @web3-events) [(:contract-key contract) event])})
+
   (if err
     (log/error "Error Dispatching" {:err err :event evt} ::event-dispatch)
-    (when-not (:disable-dispatch-logging? @web3-events)
+    (when (:dispatch-logging? @web3-events)
       (log/info "Dispatching event" {:err err :event evt} ::event-dispatch)))
 
   (when (and err
              (fn? (:on-error @web3-events)))
     ((:on-error @web3-events) err evt))
 
-  (when (and (:write-events-into-file? @web3-events)
+  #_(when (and (:write-events-into-file? @web3-events)
              (not err))
     (append-line-into-file! (:file-path @web3-events) (str evt)))
 
@@ -169,12 +174,30 @@
                (when err
                  (log/error "Error uninstalling event filter" {:error err :filter-id id}))))))
 
+;; TODO
+(defn start [{:keys [:events] :as opts}]
 
-(defn start [{:keys [:events :read-past-events-from-file? :write-events-into-file? :file-path] :as opts
-              :or {file-path default-file-path}}]
+  (safe-go
+   (when-not (<? (web3-eth/is-listening? @web3))
+     (throw (js/Error. "Can't connect to Ethereum node"))))
 
-  #_(when-not (web3/connected? @web3)
-    (throw (js/Error. "Can't connect to Ethereum node")))
+  (log/debug "web3-events/start" {:events events})
+
+  (smart-contracts/replay-past-events-in-order
+   events
+   dispatch
+   {:from-block 0
+    :to-block "latest"
+    :on-finish (fn []
+                 (log/debug "web3-events/on-finish")
+                 #_(dispatch-after-past-events-callbacks!)
+                 #_(start-dispatching-latest-events! events last-block-number))})
+
+  #_(log-event-filters-start! past-event-filters)
+
+  (merge opts {:callbacks (atom {})})
+
+
 
   #_(let [last-block-number (web3-eth/block-number @web3)
         past-event-filters (if-not read-past-events-from-file?
@@ -205,9 +228,11 @@
     (merge opts {:callbacks (atom {})
                  :event-filters (atom past-event-filters)
                  :past-events-from-file past-events-from-file
-                 :file-path file-path})))
+                 :file-path file-path}))
 
+  )
 
+;; TODO
 (defn stop [web3-events]
   #_(let [filters @(:event-filters @web3-events)]
     (log/warn "Stopping web3-events" {:event-filters (medley/map-vals #(aget % "filterId") filters)})

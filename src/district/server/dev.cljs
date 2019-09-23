@@ -2,14 +2,16 @@
   (:require [district.server.config :refer [config]]
             [district.server.logging :refer [logging]]
             [district.server.web3 :refer [web3]]
+            [district.server.syncer]
             [district.server.smart-contracts :as smart-contracts]
             [district.server.web3-events]
+            [district.server.constants :as constants]
             [cljs.nodejs :as nodejs]
             [mount.core :as mount]
             [taoensso.timbre :as log]
             [district.shared.smart-contracts :as smart-contracts-dev]
 
-            [district.shared.async-helpers :refer [promise->]]
+            [district.shared.async-helpers :as async-helpers :refer [promise->]]
 
             ;; [web3.impl.ethersjs :as etherjs]
             [web3.impl.web3js :as web3js]
@@ -28,7 +30,9 @@
         {:config {:default {:logging {:level :info
                                       :console? true}
                             :web3 {:url "http://localhost:8549"}
-                            :smart-contracts {:contracts-var contracts-var}}}})
+                            :smart-contracts {:contracts-var contracts-var}
+                            :web3-events {:events constants/web3-events}
+                            }}})
       (mount/start)
       (as-> $ (log/warn "Started" {:components $
                                    :config @config}))))
@@ -42,6 +46,9 @@
   (start))
 
 (defn -main [& args]
+
+  (async-helpers/extend-promises-as-channels!)
+
   (log/debug "Starting...")
   (start))
 
@@ -49,7 +56,7 @@
 
 ;; TODO : syncer for MyContract
 ;; TODO : generator for MyContract
-;; TODO : block timestamp
+;; TODO : clojurize all responses
 (defn test-it []
   (let [events {:my-contract/set-counter-event [:my-contract :SetCounterEvent]}
         new-sub (atom nil)
@@ -57,13 +64,22 @@
         inst (web3js/new)
         web3-inst {:instance inst
                    :provider (web3-core/websocket-provider inst "ws://127.0.0.1:8549")}]
-    (promise-> (web3-eth/accounts web3-inst)
+    (promise-> (web3-eth/is-listening? web3-inst)
+
+               #(prn "connected?:" %)
+
+               #(web3-eth/accounts web3-inst)
                #(prn "accounts:" %)
 
                #(web3-eth/get-block-number web3-inst)
                (fn [block-number]
-                 (web3-eth/get-block web3-inst block-number false))
-               #(prn "block:" %)
+                 (web3-eth/get-block web3-inst block-number false (fn [err res]
+                                                                    (let [{:keys [:timestamp]} (js->clj res :keywordize-keys true)]
+
+                                                                      (log/debug "timestamp" {:timestamp timestamp})
+
+                                                                      (js/Promise.resolve timestamp)))))
+               #(prn "block :" %)
 
                ;; #(web3-eth/get-transaction-receipt web3-inst tx-hash)
                ;; #(prn "past tx-receipt:" %)

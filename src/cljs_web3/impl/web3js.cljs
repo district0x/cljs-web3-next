@@ -6,13 +6,15 @@
 
 (def Web3 (nodejs/require "web3"))
 
-;;; TODO : clojurize all returned values
+;; TODO : clojurize all return values
 (defrecord+ Web3Js []
   Web3Api
   (-http-provider [_ uri]
     (new Web3 (new (aget Web3 "providers" "HttpProvider") uri)))
   (-websocket-provider [_ uri]
     (new Web3 (new (aget Web3 "providers" "WebsocketProvider") uri)))
+  (-is-listening? [_ provider]
+    (js-invoke (aget provider "eth" "net") "isListening"))
   (-sha3 [_ provider arg]
     (js-invoke (aget provider "utils") "sha3" arg))
   (-solidity-sha3 [_ provider args]

@@ -7,12 +7,12 @@
 
    [district.shared.async-helpers :refer [promise->]]
    [taoensso.timbre :as log]
-
+   [clojure.set :as clojure-set]
    [cljs.core.async :refer [<! timeout] :as async]
    [cljs.core.match :refer-macros [match]]
    [cljs.nodejs :as nodejs]
    [cljs.pprint]
-   [cljs.spec.alpha :as s]
+   ;; [cljs.spec.alpha :as s]
    [clojure.string :as string]
    [district.shared.async-helpers :as asynch]
    [district.server.config :refer [config]]
@@ -57,12 +57,11 @@
                                                              contract-key-or-addr))))
 
 (defn contract-by-address [contract-address]
-  (reduce
-    (fn [_ [contract-key {:keys [:address] :as contract}]]
-      (when (= contract-address address)
-        (reduced (assoc contract :contract-key contract-key))))
-    ;; nil
-    @(:contracts @smart-contracts)))
+  (reduce-kv (fn [_ contract-key {:keys [:address] :as contract}]
+               (when (= (string/lower-case contract-address) (string/lower-case address))
+                 (reduced (assoc contract :contract-key contract-key))))
+             ;; nil
+             @(:contracts @smart-contracts)))
 
 (defn update-contract! [contract-key contract]
   (swap! (:contracts @smart-contracts) update contract-key merge contract))
@@ -101,81 +100,13 @@
             :bin bin
             :instance (web3-eth/contract-at @web3 abi (:address contract))})))
 
-(defn start [{:keys [contracts-build-path :contracts-var print-gas-usage?] :as opts}]
+(defn start [{:keys [:contracts-var] :as opts}]
 
   (merge
    {:contracts (atom (into {} (map (fn [[k v]]
                                      [k (load-contract-files v opts)])
                                    @contracts-var)))}
    opts))
-
-#_(defn link-library [bin placeholder library-address]
-  (string/replace bin placeholder (subs library-address 2)))
-
-
-#_(defn link-contract-libraries [smart-contracts bin library-placeholders]
-  (reduce (fn [bin [placeholder replacement]]
-            (let [address (if (keyword? replacement)
-                            (get-in smart-contracts [replacement :address])
-                            replacement)]
-              (link-library bin placeholder address)))
-          bin library-placeholders))
-
-#_(defn- handle-deployed-contract! [contract-key {:keys [:abi :bin] :as contract} tx-hash]
-  (let [{:keys [:gas-used :block-number :contract-address]} (web3-eth/get-transaction-receipt @web3 tx-hash)
-        contract (merge contract {:instance (web3-eth/contract-at @web3 abi contract-address)
-                                  :address contract-address})]
-    (when (and gas-used block-number)
-      (update-contract! contract-key contract)
-      (when (:print-gas-usage? @smart-contracts)
-        (println (:name contract) contract-address (.toLocaleString gas-used)))
-      contract)))
-
-#_(defn deploy-smart-contract!
-  "# arguments:
-     * `contract-key` keyword e.g. :some-contract
-   ## `args` is a vector of arguments for the constructor
-   ## `opts` is a map of options:
-    * `placeholder-replacements` : a map containing replacements for library placeholders
-    * `from` : address deploying the conract
-    * `:gas` : gas limit for the contract creation transaction
-   # returns:
-   function returns a Promise resolving to the deployed contracts address."
-  ([contract-key args {:keys [:placeholder-replacements :from :gas] :as opts}]
-   (let [{:keys [:abi :bin] :as contract} (load-contract-files (contract contract-key) @smart-contracts)
-         opts (merge {:data (str "0x" (link-contract-libraries @(:contracts @smart-contracts) bin placeholder-replacements))}
-                     (when-not from
-                       {:from (first (web3-eth/accounts @web3))})
-                     (when-not gas
-                       {:gas 4000000})
-                     opts)]
-     (-> (js/Promise.resolve
-          (-> (apply web3-eth/contract-new @web3 abi
-                     (merge args (select-keys opts [:from :to :gas-price :gas
-                                                    :value :data :nonce
-                                                    :condition])))
-              (aget "transactionHash")))
-         (.then #(wait-for-tx-receipt %))
-         (.then (fn [receipt]
-                  (handle-deployed-contract! contract-key contract (:transaction-hash receipt)))))))
-
-  ([contract-key args]
-   (deploy-smart-contract! contract-key args {:from (first (web3-eth/accounts @web3))
-                                              :gas 4000000})))
-
-#_(defn write-smart-contracts! []
-  (let [{:keys [:ns :file :name]} (meta (:contracts-var @smart-contracts))]
-    (.writeFileSync fs file
-                    (str "(ns " ns ") \n\n"
-                         "(def " name " \n"
-                         (as-> @(:contracts @smart-contracts) $
-                           (map (fn [[k v]]
-                                  [k (dissoc v :instance :abi :bin)]) $)
-                           (into {} $)
-                           ;; cljs.pprint/write won't compile with simple optimisations
-                           ;; therefore must be required only in dev environment
-                           (cljs.pprint/write $ :stream nil))
-                         ")"))))
 
 (defn instance-from-arg [contract & [{:keys [:ignore-forward?]}]]
   (cond
@@ -344,16 +275,28 @@
                               (string/upper-case (first event-name)))
                          (keyword event-name)
                          (web3-utils/kebab-case (keyword event-name)))))
-      (assoc :contract contract-name)))
+
+      ;; (assoc :contract contract-name)
+
+      ;; TODO : assoc the contract
+      (assoc :contract (dissoc (contract-by-address (:address log))
+                               :abi :bin :instance))
+
+      (clojure-set/rename-keys {:return-values :args})
+      ))
 
 (defn replay-past-events-in-order [event-filters callback {:keys [:from-block :to-block
                                                                   :ignore-forward? :delay
                                                                   :transform-fn :on-finish]
                                                            :or {delay 0 transform-fn identity}
                                                            :as opts}]
+
   (let [logs-chans (for [[k [contract event]] event-filters]
                      (let [logs-ch (async/promise-chan)
                            contract-instance (instance-from-arg contract {:ignore-forward? ignore-forward?})]
+
+                       ;; (log/debug "### REPLAY" {:evt event})
+
                        (web3-eth/get-past-events @web3
                                                  contract-instance
                                                  event
