@@ -6,7 +6,6 @@
 
 (def Web3 (nodejs/require "web3"))
 
-;; TODO : clojurize all return values
 (defrecord+ Web3Js []
   Web3Api
   (-http-provider [_ uri]
@@ -33,6 +32,8 @@
     (js-invoke (apply js-invoke (aget contract-instance "methods") (web3-utils/camel-case (name method)) args) "call" (clj->js opts)))
   (-contract-send [_ contract-instance method args opts]
     (js-invoke (apply js-invoke (aget contract-instance "methods") (web3-utils/camel-case (name method)) args) "send" (clj->js opts)))
+  (-subscribe-events [_ contract-instance event opts & [callback]]
+    ((aget contract-instance "events" (web3-utils/camel-case (name event))) (web3-utils/cljkk->js opts) callback))
   (-subscribe-logs [_ provider contract-instance opts & [callback]]
     (js-invoke (aget provider "eth") "subscribe" "logs" (web3-utils/cljkk->js opts) callback))
   (-decode-log [_ provider abi data topics]

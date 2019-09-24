@@ -25,6 +25,9 @@
 (defn contract-send [{:keys [:instance]} contract-instance method args opts]
   (api/-contract-send instance contract-instance method args opts))
 
+(defn subscribe-events [{:keys [:instance]} contract-instance event opts & [callback]]
+  (api/-subscribe-events instance contract-instance event opts callback))
+
 (defn subscribe-logs [{:keys [:instance :provider]} contract-instance opts & [callback]]
   (api/-subscribe-logs instance provider contract-instance opts callback))
 

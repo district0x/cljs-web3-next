@@ -14,6 +14,7 @@
   (-get-block [this provider block-hash-or-number return-transactions? & [callback]])
   (-contract-call [this contract-instance method args opts])
   (-contract-send [this contract-instance method args opts])
+  (-subscribe-events [this contract-instance event opts & [callback]])
   (-subscribe-logs [this provider contract-instance opts & [callback]])
   (-decode-log [this provider abi data topics])
   (-on [this event-emitter k callback])

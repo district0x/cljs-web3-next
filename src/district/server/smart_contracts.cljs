@@ -60,7 +60,7 @@
   (reduce-kv (fn [_ contract-key {:keys [:address] :as contract}]
                (when (= (string/lower-case contract-address) (string/lower-case address))
                  (reduced (assoc contract :contract-key contract-key))))
-             ;; nil
+             nil
              @(:contracts @smart-contracts)))
 
 (defn update-contract! [contract-key contract]
@@ -116,32 +116,32 @@
     :else contract))
 
 #_(defn- wait-for-tx-receipt*
-  "callback is a nodejs style callback i.e. (fn [error data] ...)"
-  [tx-hash callback]
-  (web3-eth/get-transaction-receipt @web3 tx-hash (fn [error receipt]
-                                                    (if error
-                                                      (callback error nil)
-                                                      (if receipt
-                                                        (callback nil receipt)
-                                                        (js/setTimeout #(wait-for-tx-receipt* tx-hash callback) 1000))))))
+    "callback is a nodejs style callback i.e. (fn [error data] ...)"
+    [tx-hash callback]
+    (web3-eth/get-transaction-receipt @web3 tx-hash (fn [error receipt]
+                                                      (if error
+                                                        (callback error nil)
+                                                        (if receipt
+                                                          (callback nil receipt)
+                                                          (js/setTimeout #(wait-for-tx-receipt* tx-hash callback) 1000))))))
 
 #_(defn wait-for-tx-receipt
-  "blocks until transaction `tx-hash` gets sent to the network. returns js/Promise"
-  [tx-hash]
-  (js/Promise. (fn [resolve reject]
-                 (wait-for-tx-receipt* tx-hash (fn [error tx-receipt]
-                                                 (if error
-                                                   (reject error)
-                                                   (resolve tx-receipt)))))))
+    "blocks until transaction `tx-hash` gets sent to the network. returns js/Promise"
+    [tx-hash]
+    (js/Promise. (fn [resolve reject]
+                   (wait-for-tx-receipt* tx-hash (fn [error tx-receipt]
+                                                   (if error
+                                                     (reject error)
+                                                     (resolve tx-receipt)))))))
 
 #_(defn wait-for-tx-receipt
-  "blocks until transaction `tx-hash` gets sent to the network. returns js/Promise"
-  [tx-hash]
-  (promise-> (web3-eth/get-transaction-receipt @web3 tx-hash)
-             (fn [receipt]
-               (if receipt
-                 receipt
-                 (js/setTimeout #(wait-for-tx-receipt tx-hash) 1000)))))
+    "blocks until transaction `tx-hash` gets sent to the network. returns js/Promise"
+    [tx-hash]
+    (promise-> (web3-eth/get-transaction-receipt @web3 tx-hash)
+               (fn [receipt]
+                 (if receipt
+                   receipt
+                   (js/setTimeout #(wait-for-tx-receipt tx-hash) 1000)))))
 
 (defn contract-call
   "Will call a method and execute its smart contract method in the EVM without sending any transaction.
@@ -198,71 +198,6 @@
   ([contract method]
    (contract-send contract method [] {})))
 
-(defn subscribe-logs [contract event {:keys [:from-block :address :topics :ignore-forward?] :as opts} & [callback]]
-  (let [contract-instance (instance-from-arg contract {:ignore-forward? ignore-forward?})
-        event-signature (:signature (web3-utils/event-interface contract-instance event))]
-    (web3-eth/subscribe-logs @web3
-                             contract-instance
-                             (merge {:address (aget contract-instance "options" "address")
-                                     :topics [event-signature]}
-                                    opts)
-                             callback)))
-
-#_(defn create-event-filter
-  "This function installs event filter
-   # arguments:
-   ## `contract` parameter can be one of:
-    * keyword :some-contract
-    * tuple of keyword and address [:some-contract 0x1234...]
-    * instance SomeContract
-   ## `event` : camel_case keyword corresponding to the smart-contract event
-   ## `filter-opts` : a map of indexed return values you want to filter the logs by e.g. {:valueA 1 :valueB 2}
-   ## `opts` : specifies additional filter options, can be one of:
-    * string 'latest' to specify that only new observed events should be processed
-    * map {:from-block 0 :to-block 100} specifying earliest and latest block on which the event handler should fire
-   ## `on-event` : event handler function
-   see https://github.com/ethereum/wiki/wiki/JavaScript-API#contract-events for additional details"
-  [contract event filter-opts opts & [on-event {:keys [:ignore-forward?]}]]
-  (apply web3-eth/contract-call (instance-from-arg contract {:ignore-forward? ignore-forward?}) event
-         [filter-opts
-          opts
-          (fn [err log]
-            (when on-event
-              (if-not log
-                (on-event err log)
-                (on-event err (enrich-event-log log)))))]))
-
-
-#_(defn contract-event-in-tx [tx-hash contract event-name & args]
-  (let [instance (instance-from-arg contract)
-        event-filter (apply web3-eth/contract-call instance event-name args)
-        formatter (aget event-filter "formatter")
-        contract-addr (aget instance "address")
-        {:keys [:logs]} (web3-eth/get-transaction-receipt @web3 tx-hash)
-        signature (aget event-filter "options" "topics" 0)]
-    (reduce (fn [result log]
-              (when (= signature (first (:topics log)))
-                (let [{:keys [:address] :as evt} (js->clj (formatter (clj->js log)) :keywordize-keys true)]
-                  (when (= contract-addr address)
-                    (reduced (js->cljkk evt))))))
-            nil
-            logs)))
-
-#_(defn contract-events-in-tx [tx-hash contract event-name & args]
-  (let [instance (instance-from-arg contract)
-        event-filter (apply web3-eth/contract-call instance event-name args)
-        formatter (aget event-filter "formatter")
-        contract-addr (aget instance "address")
-        {:keys [:logs]} (web3-eth/get-transaction-receipt @web3 tx-hash)
-        signature (aget event-filter "options" "topics" 0)]
-    (reduce (fn [result log]
-              (when (= signature (first (:topics log)))
-                (let [{:keys [:address] :as evt} (js->clj (formatter (clj->js log)) :keywordize-keys true)]
-                  (when (= contract-addr address)
-                    (concat result [(js->cljkk evt)])))))
-            nil
-            logs)))
-
 (defn- enrich-event-log [contract-name contract-instance {:keys [:event :return-values] :as log}]
   (-> log
       (update :return-values #(reduce (fn [res value]
@@ -275,28 +210,107 @@
                               (string/upper-case (first event-name)))
                          (keyword event-name)
                          (web3-utils/kebab-case (keyword event-name)))))
-
-      ;; (assoc :contract contract-name)
-
-      ;; TODO : assoc the contract
       (assoc :contract (dissoc (contract-by-address (:address log))
                                :abi :bin :instance))
+      (clojure-set/rename-keys {:return-values :args})))
 
-      (clojure-set/rename-keys {:return-values :args})
-      ))
+(defn subscribe-events [contract event {:keys [:from-block :address :topics :ignore-forward?] :as opts} & [callback]]
+  (let [contract-instance (instance-from-arg contract {:ignore-forward? ignore-forward?})]
 
-(defn replay-past-events-in-order [event-filters callback {:keys [:from-block :to-block
-                                                                  :ignore-forward? :delay
-                                                                  :transform-fn :on-finish]
-                                                           :or {delay 0 transform-fn identity}
-                                                           :as opts}]
+    (web3-eth/subscribe-events @web3
+                             contract-instance
+                             event
+                             opts
+                             (fn [error event]
 
-  (let [logs-chans (for [[k [contract event]] event-filters]
+                               (log/debug "#### subscribe-events" {:event (->> event
+                                                                              web3-utils/js->cljkk
+                                                                              (enrich-event-log contract contract-instance)
+                                                                              )})
+
+                               (callback error (->> event
+                                                    web3-utils/js->cljkk
+                                                    (enrich-event-log contract contract-instance)
+                                                    ))
+                               )
+
+
+                             )))
+
+(defn subscribe-logs [contract event {:keys [:from-block :address :topics :ignore-forward?] :as opts} & [callback]]
+  (let [contract-instance (instance-from-arg contract {:ignore-forward? ignore-forward?})
+        event-signature (:signature (web3-utils/event-interface contract-instance event))]
+    (web3-eth/subscribe-logs @web3
+                             contract-instance
+                             (merge {:address (aget contract-instance "options" "address")
+                                     :topics [event-signature]}
+                                    opts)
+                             (fn [error event]
+                               (callback error (web3-utils/js->cljkk event))))))
+
+#_(defn create-event-filter
+    "This function installs event filter
+   # arguments:
+   ## `contract` parameter can be one of:
+    * keyword :some-contract
+    * tuple of keyword and address [:some-contract 0x1234...]
+    * instance SomeContract
+   ## `event` : camel_case keyword corresponding to the smart-contract event
+   ## `filter-opts` : a map of indexed return values you want to filter the logs by e.g. {:valueA 1 :valueB 2}
+   ## `opts` : specifies additional filter options, can be one of:
+    * string 'latest' to specify that only new observed events should be processed
+    * map {:from-block 0 :to-block 100} specifying earliest and latest block on which the event handler should fire
+   ## `on-event` : event handler function
+   see https://github.com/ethereum/wiki/wiki/JavaScript-API#contract-events for additional details"
+    [contract event filter-opts opts & [on-event {:keys [:ignore-forward?]}]]
+    (apply web3-eth/contract-call (instance-from-arg contract {:ignore-forward? ignore-forward?}) event
+           [filter-opts
+            opts
+            (fn [err log]
+              (when on-event
+                (if-not log
+                  (on-event err log)
+                  (on-event err (enrich-event-log log)))))]))
+
+
+#_(defn contract-event-in-tx [tx-hash contract event-name & args]
+    (let [instance (instance-from-arg contract)
+          event-filter (apply web3-eth/contract-call instance event-name args)
+          formatter (aget event-filter "formatter")
+          contract-addr (aget instance "address")
+          {:keys [:logs]} (web3-eth/get-transaction-receipt @web3 tx-hash)
+          signature (aget event-filter "options" "topics" 0)]
+      (reduce (fn [result log]
+                (when (= signature (first (:topics log)))
+                  (let [{:keys [:address] :as evt} (js->clj (formatter (clj->js log)) :keywordize-keys true)]
+                    (when (= contract-addr address)
+                      (reduced (js->cljkk evt))))))
+              nil
+              logs)))
+
+#_(defn contract-events-in-tx [tx-hash contract event-name & args]
+    (let [instance (instance-from-arg contract)
+          event-filter (apply web3-eth/contract-call instance event-name args)
+          formatter (aget event-filter "formatter")
+          contract-addr (aget instance "address")
+          {:keys [:logs]} (web3-eth/get-transaction-receipt @web3 tx-hash)
+          signature (aget event-filter "options" "topics" 0)]
+      (reduce (fn [result log]
+                (when (= signature (first (:topics log)))
+                  (let [{:keys [:address] :as evt} (js->clj (formatter (clj->js log)) :keywordize-keys true)]
+                    (when (= contract-addr address)
+                      (concat result [(js->cljkk evt)])))))
+              nil
+              logs)))
+
+(defn replay-past-events-in-order [events callback {:keys [:from-block :to-block
+                                                           :ignore-forward? :delay
+                                                           :transform-fn :on-finish]
+                                                    :or {delay 0 transform-fn identity}
+                                                    :as opts}]
+  (let [logs-chans (for [[k [contract event]] events]
                      (let [logs-ch (async/promise-chan)
                            contract-instance (instance-from-arg contract {:ignore-forward? ignore-forward?})]
-
-                       ;; (log/debug "### REPLAY" {:evt event})
-
                        (web3-eth/get-past-events @web3
                                                  contract-instance
                                                  event

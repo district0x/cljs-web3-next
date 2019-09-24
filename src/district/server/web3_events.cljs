@@ -150,15 +150,38 @@
                                   event-filters)}))
     700))
 
+;; TODO : start listening, save event emitters to state
+(defn- start-dispatching-latest-events! [events]
+  (safe-go
+   (let [last-block-number (<? (web3-eth/get-block-number @web3))
+         event-filters (doall
+                        (for [[k [contract event]] events]
+                          (let [[_ callback] (first (get-in @(:callbacks @web3-events) [contract event]))]
 
-#_(defn- start-dispatching-latest-events! [events last-block-number]
-  (let [event-filters (create-latest-event-filters events last-block-number)]
-    (swap! (:event-filters @web3-events) #(into % event-filters))
-    (log-event-filters-start! event-filters)
-    event-filters))
+                            (log/debug "Watching for new events" {:c contract
+                                                                  :e event
+                                                                  :cb callback
+                                                                  :from-block last-block-number
+                                                                  :id _})
+
+                            (smart-contracts/subscribe-events contract
+                                                            event
+                                                            {:from-block last-block-number}
+                                                            callback
+                                                            ))
+
+                          ))]
+     event-filters))
+
+  #_(let [event-filters (create-latest-event-filters events last-block-number)]
+      (swap! (:event-filters @web3-events) #(into % event-filters))
+      (log-event-filters-start! event-filters)
+      event-filters)
+
+  )
 
 
-#_(defn- dispatch-after-past-events-callbacks! []
+(defn- dispatch-after-past-events-callbacks! []
   (let [callbacks (get-in @(:callbacks @web3-events) [::after-past-events-dummy-contract ::after-past-events-dummy-event])
         callback-fns (vals callbacks)
         callback-ids (keys callbacks)]
@@ -174,27 +197,21 @@
                (when err
                  (log/error "Error uninstalling event filter" {:error err :filter-id id}))))))
 
-;; TODO
+;; TODO : latest-events, log them
 (defn start [{:keys [:events] :as opts}]
-
   (safe-go
+
    (when-not (<? (web3-eth/is-listening? @web3))
-     (throw (js/Error. "Can't connect to Ethereum node"))))
+     (throw (js/Error. "Can't connect to Ethereum node")))
 
-  (log/debug "web3-events/start" {:events events})
-
-  (smart-contracts/replay-past-events-in-order
-   events
-   dispatch
-   {:from-block 0
-    :to-block "latest"
-    :on-finish (fn []
-                 (log/debug "web3-events/on-finish")
-                 #_(dispatch-after-past-events-callbacks!)
-                 #_(start-dispatching-latest-events! events last-block-number))})
-
-  #_(log-event-filters-start! past-event-filters)
-
+   (smart-contracts/replay-past-events-in-order
+    events
+    dispatch
+    {:from-block 0
+     :to-block "latest"
+     :on-finish (fn []
+                  (dispatch-after-past-events-callbacks!)
+                  (start-dispatching-latest-events! events))}))
   (merge opts {:callbacks (atom {})})
 
 
@@ -232,7 +249,7 @@
 
   )
 
-;; TODO
+;; TODO : uninstall logs filter
 (defn stop [web3-events]
   #_(let [filters @(:event-filters @web3-events)]
     (log/warn "Stopping web3-events" {:event-filters (medley/map-vals #(aget % "filterId") filters)})
