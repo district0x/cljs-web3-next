@@ -58,23 +58,23 @@
         inst (web3js/new)
         web3-inst {:instance inst
                    :provider (web3-core/websocket-provider inst "ws://127.0.0.1:8549")}]
-    (promise-> (web3-eth/is-listening? web3-inst)
+    (promise-> (web3-eth/is-listening? web3-inst (fn [_ res] (prn "isListening?" res)))
 
                #(prn "connected?:" %)
 
-               #(web3-eth/accounts web3-inst)
-               #(prn "accounts:" %)
+               ;; #(web3-eth/accounts web3-inst)
+               ;; #(prn "accounts:" %)
 
-               #(web3-eth/get-block-number web3-inst)
-               (fn [block-number]
-                 (web3-eth/get-block web3-inst block-number false (fn [err res]
-                                                                    (let [{:keys [:timestamp]} (js->clj res :keywordize-keys true)]
-                                                                      (log/debug "timestamp" {:timestamp timestamp})
-                                                                      (js/Promise.resolve timestamp)))))
-               #(prn "block :" %)
+               ;; #(web3-eth/get-block-number web3-inst)
+               ;; (fn [block-number]
+               ;;   (web3-eth/get-block web3-inst block-number false (fn [err res]
+               ;;                                                      (let [{:keys [:timestamp]} (js->clj res :keywordize-keys true)]
+               ;;                                                        (log/debug "timestamp" {:timestamp timestamp})
+               ;;                                                        (js/Promise.resolve timestamp)))))
+               ;; #(prn "block :" %)
 
-               #(web3-eth/get-transaction-receipt web3-inst tx-hash)
-               #(prn "past tx-receipt:" %)
+               ;; #(web3-eth/get-transaction-receipt web3-inst tx-hash)
+               ;; #(prn "past tx-receipt:" %)
 
                ;; replay past events
                #_#(smart-contracts/replay-past-events-in-order events (fn [error event]
@@ -113,8 +113,8 @@
                ;; ;; #(smart-contracts/contract-call :my-contract :counter)
                ;; ;; #(prn "result:" %)
 
-               #(smart-contracts/contract-send :my-contract :set-counter [3] {:gas 5000000})
-               #(smart-contracts/contract-send :my-contract :increment-counter [1] {:gas 5000000})
+               ;; #(smart-contracts/contract-send :my-contract :set-counter [3] {:gas 5000000})
+               ;; #(smart-contracts/contract-send :my-contract :increment-counter [1] {:gas 5000000})
                ;; #(log/debug "send-tx-receipt" {:receipt %})
 
                ;; #(web3-eth/unsubscribe web3-inst @new-sub (fn [err succ]

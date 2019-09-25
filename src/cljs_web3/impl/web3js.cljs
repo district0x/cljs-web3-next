@@ -12,8 +12,8 @@
     (new Web3 (new (aget Web3 "providers" "HttpProvider") uri)))
   (-websocket-provider [_ uri]
     (new Web3 (new (aget Web3 "providers" "WebsocketProvider") uri)))
-  (-is-listening? [_ provider]
-    (js-invoke (aget provider "eth" "net") "isListening"))
+  (-is-listening? [_ provider & [callback]]
+    (apply js-invoke (aget provider "eth" "net") "isListening" (remove nil? [callback])))
   (-sha3 [_ provider arg]
     (js-invoke (aget provider "utils") "sha3" arg))
   (-solidity-sha3 [_ provider args]
@@ -33,9 +33,7 @@
   (-contract-send [_ contract-instance method args opts]
     (js-invoke (apply js-invoke (aget contract-instance "methods") (web3-utils/camel-case (name method)) args) "send" (clj->js opts)))
   (-subscribe-events [_ contract-instance event opts & [callback]]
-    (js-invoke (aget contract-instance "events") (web3-utils/camel-case (name event)) (web3-utils/cljkk->js opts) callback)
-    ;; ((aget contract-instance "events" (web3-utils/camel-case (name event))) (web3-utils/cljkk->js opts) callback)
-    )
+    (js-invoke (aget contract-instance "events") (web3-utils/camel-case (name event)) (web3-utils/cljkk->js opts) callback))
   (-subscribe-logs [_ provider contract-instance opts & [callback]]
     (js-invoke (aget provider "eth") "subscribe" "logs" (web3-utils/cljkk->js opts) callback))
   (-decode-log [_ provider abi data topics]

@@ -4,7 +4,7 @@
 (defprotocol+ Web3Api
   (-http-provider [this uri])
   (-websocket-provider [this uri])
-  (-is-listening? [this provider])
+  (-is-listening? [this provider & [callback]])
   (-sha3 [this provider arg])
   (-solidity-sha3 [this provider args])
   (-contract-at [this provider abi address])
