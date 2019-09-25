@@ -1,10 +1,8 @@
 (ns district.server.smart-contracts
   (:require
-
    [cljs-web3.core :as web3-core]
    [cljs-web3.eth :as web3-eth]
    [cljs-web3.utils :as web3-utils]
-
    [district.shared.async-helpers :refer [promise->]]
    [taoensso.timbre :as log]
    [clojure.set :as clojure-set]
@@ -12,7 +10,6 @@
    [cljs.core.match :refer-macros [match]]
    [cljs.nodejs :as nodejs]
    [cljs.pprint]
-   ;; [cljs.spec.alpha :as s]
    [clojure.string :as string]
    [district.shared.async-helpers :as asynch]
    [district.server.config :refer [config]]
@@ -25,10 +22,10 @@
 (def process (nodejs/require "process"))
 
 (declare start)
-;; (declare wait-for-tx-receipt)
 
 (defstate smart-contracts :start (start (merge (:smart-contracts @config)
-                                               (:smart-contracts (mount/args)))))
+                                               (:smart-contracts (mount/args))))
+  :stop ::stopped)
 
 (defn contract [contract-key]
   (get @(:contracts @smart-contracts) contract-key))
@@ -99,14 +96,6 @@
            {:abi abi
             :bin bin
             :instance (web3-eth/contract-at @web3 abi (:address contract))})))
-
-(defn start [{:keys [:contracts-var] :as opts}]
-
-  (merge
-   {:contracts (atom (into {} (map (fn [[k v]]
-                                     [k (load-contract-files v opts)])
-                                   @contracts-var)))}
-   opts))
 
 (defn instance-from-arg [contract & [{:keys [:ignore-forward?]}]]
   (cond
@@ -216,28 +205,16 @@
 
 (defn subscribe-events [contract event {:keys [:from-block :address :topics :ignore-forward?] :as opts} & [callback]]
   (let [contract-instance (instance-from-arg contract {:ignore-forward? ignore-forward?})]
-
     (web3-eth/subscribe-events @web3
-                             contract-instance
-                             event
-                             opts
-                             (fn [error event]
+                               contract-instance
+                               event
+                               opts
+                               (fn [error event]
+                                 (callback error (->> event
+                                                      web3-utils/js->cljkk
+                                                      (enrich-event-log contract contract-instance)))))))
 
-                               (log/debug "#### subscribe-events" {:event (->> event
-                                                                              web3-utils/js->cljkk
-                                                                              (enrich-event-log contract contract-instance)
-                                                                              )})
-
-                               (callback error (->> event
-                                                    web3-utils/js->cljkk
-                                                    (enrich-event-log contract contract-instance)
-                                                    ))
-                               )
-
-
-                             )))
-
-(defn subscribe-logs [contract event {:keys [:from-block :address :topics :ignore-forward?] :as opts} & [callback]]
+(defn subscribe-event-logs [contract event {:keys [:from-block :address :topics :ignore-forward?] :as opts} & [callback]]
   (let [contract-instance (instance-from-arg contract {:ignore-forward? ignore-forward?})
         event-signature (:signature (web3-utils/event-interface contract-instance event))]
     (web3-eth/subscribe-logs @web3
@@ -247,31 +224,6 @@
                                     opts)
                              (fn [error event]
                                (callback error (web3-utils/js->cljkk event))))))
-
-#_(defn create-event-filter
-    "This function installs event filter
-   # arguments:
-   ## `contract` parameter can be one of:
-    * keyword :some-contract
-    * tuple of keyword and address [:some-contract 0x1234...]
-    * instance SomeContract
-   ## `event` : camel_case keyword corresponding to the smart-contract event
-   ## `filter-opts` : a map of indexed return values you want to filter the logs by e.g. {:valueA 1 :valueB 2}
-   ## `opts` : specifies additional filter options, can be one of:
-    * string 'latest' to specify that only new observed events should be processed
-    * map {:from-block 0 :to-block 100} specifying earliest and latest block on which the event handler should fire
-   ## `on-event` : event handler function
-   see https://github.com/ethereum/wiki/wiki/JavaScript-API#contract-events for additional details"
-    [contract event filter-opts opts & [on-event {:keys [:ignore-forward?]}]]
-    (apply web3-eth/contract-call (instance-from-arg contract {:ignore-forward? ignore-forward?}) event
-           [filter-opts
-            opts
-            (fn [err log]
-              (when on-event
-                (if-not log
-                  (on-event err log)
-                  (on-event err (enrich-event-log log)))))]))
-
 
 #_(defn contract-event-in-tx [tx-hash contract event-name & args]
     (let [instance (instance-from-arg contract)
@@ -351,3 +303,10 @@
 
               (when (fn? on-finish)
                 (on-finish sorted-logs)))))))))
+
+(defn start [{:keys [:contracts-var] :as opts}]
+  (merge
+   {:contracts (atom (into {} (map (fn [[k v]]
+                                     [k (load-contract-files v opts)])
+                                   @contracts-var)))}
+   opts))

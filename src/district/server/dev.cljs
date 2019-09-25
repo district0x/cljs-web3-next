@@ -50,7 +50,7 @@
 
 (set! *main-cli-fn* -main)
 
-;; TODO : syncer for MyContract
+;; IN-PROGRESS : syncer for MyContract
 ;; TODO : generator for MyContract
 (defn test-it []
   (let [events {:my-contract/set-counter-event [:my-contract :SetCounterEvent]}
@@ -87,7 +87,7 @@
 
                ;; watch for new events
                #(web3-eth/get-block-number web3-inst)
-               #_(fn [last-block-number]
+               (fn [last-block-number]
                  (let [event-emitter (smart-contracts/subscribe-events :my-contract
                                                                        :SetCounterEvent
                                                                        {:from-block last-block-number}
@@ -117,6 +117,9 @@
                ;; ;; #(smart-contracts/contract-send :my-contract :increment-counter [1] {:gas 5000000})
                ;; ;; #(log/debug "send-tx-receipt" {:receipt %})
 
-               ;; #(web3-eth/unsubscribe web3-inst @new-sub)
+               #(web3-eth/unsubscribe web3-inst @new-sub (fn [err succ]
+                                                           (if succ
+                                                             (log/debug "Succesfully unsubscribed" {:return succ})
+                                                             (log/debug "Error unsubscribing" {:error err}))))
 
                )))

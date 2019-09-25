@@ -10,10 +10,10 @@
             [district.server.web3-events :as web3-events]))
 
 (defn on-set-counter-event [_ {:keys [:args] :as event}]
-  (log/debug "on-set-counter-event" args))
+  (log/info "on-set-counter-event" args))
 
 (defn on-increment-counter-event [_ {:keys [:args] :as event}]
-  (log/debug "on-increment-counter-event" args))
+  (log/info "on-increment-counter-event" args))
 
 (defn- block-timestamp* [block-number]
   (let [out-ch (async/chan)]
@@ -38,9 +38,6 @@
 
 (defn- dispatcher [callback]
   (fn [err {:keys [:block-number] :as event}]
-
-;; (log/debug "@@@ dispatcher" {:evt event})
-
     (safe-go
      (try
        (let [block-timestamp (<? (block-timestamp block-number))
@@ -65,9 +62,6 @@
                          :my-contract/increment-counter-event on-increment-counter-event}
         callback-ids (doall (for [[event-key callback] event-callbacks]
                               (web3-events/register-callback! event-key (dispatcher callback))))]
-
-    ;; (log/debug "Syncer/start" {:callback-ids callback-ids})
-
     (web3-events/register-after-past-events-dispatched-callback! #(log/warn "Syncing past events finished" ::start))
     (assoc opts :callback-ids callback-ids)))
 

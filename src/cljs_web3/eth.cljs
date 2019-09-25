@@ -34,8 +34,8 @@
 (defn decode-log [{:keys [:instance :provider]} abi data topics]
   (api/-decode-log instance provider abi data topics))
 
-(defn unsubscribe [{:keys [:instance]} subscription]
-  (api/-unsubscribe instance subscription))
+(defn unsubscribe [{:keys [:instance]} subscription & [callback]]
+  (api/-unsubscribe instance subscription callback))
 
 (defn clear-subscriptions [{:keys [:instance :provider]}]
   (api/-clear-subscriptions instance provider))

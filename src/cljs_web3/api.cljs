@@ -18,9 +18,6 @@
   (-subscribe-logs [this provider contract-instance opts & [callback]])
   (-decode-log [this provider abi data topics])
   (-on [this event-emitter k callback])
-  (-unsubscribe [this subscription])
+  (-unsubscribe [this subscription & [callback]])
   (-clear-subscriptions [this provider])
-  (-get-past-events [this contract-instance event opts & [callback]])
-
-
-  )
+  (-get-past-events [this contract-instance event opts & [callback]]))

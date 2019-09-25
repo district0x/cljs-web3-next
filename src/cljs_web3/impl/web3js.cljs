@@ -40,15 +40,12 @@
     (js-invoke (aget provider "eth" "abi") "decodeLog" (clj->js abi) data (clj->js topics)))
   (-on [_ event-emitter evt callback]
     (js-invoke event-emitter "on" (name evt) callback))
-  (-unsubscribe [_ subscription]
-    (js-invoke subscription "unsubscribe"))
+  (-unsubscribe [_ subscription & [callback]]
+    (js-invoke subscription "unsubscribe" callback))
   (-clear-subscriptions [_ provider]
     (js-invoke (aget provider "eth") "clearSubscriptions"))
   (-get-past-events [this contract-instance event opts & [callback]]
-    (js-invoke contract-instance "getPastEvents" (web3-utils/camel-case (name event)) (web3-utils/cljkk->js opts) callback))
-
-
-  )
+    (js-invoke contract-instance "getPastEvents" (web3-utils/camel-case (name event)) (web3-utils/cljkk->js opts) callback)))
 
 (defn new []
   (->Web3Js))

@@ -22,10 +22,6 @@
 (def camel-case (safe-case camel-snake/->camelCase))
 (def kebab-case (safe-case camel-snake/->kebab-case))
 
-(def pascal-case
-  ":base -> :Base"
-  (safe-case camel-snake/->PascalCase))
-
 (def js->cljk #(js->clj % :keywordize-keys true))
 
 (def js->cljkk
