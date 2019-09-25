@@ -15,6 +15,8 @@
    [mount.core :as mount :refer [defstate]]
    [taoensso.timbre :as log]))
 
+;; TODO : remove safe-go, use vanilla promises
+
 (defonce fs (nodejs/require "fs"))
 
 (declare start)
@@ -71,7 +73,23 @@
      (for [callback (vals (get-in @(:callbacks @web3-events) [(:contract-key contract) event]))]
        (callback err evt)))))
 
+;; TODO
 (defn- start-dispatching-latest-events! [events]
+
+  #_(web3-eth/get-block-number @web3 (fn [_ last-block-number]
+                                     (let [event-filters (for [[k [contract event]] events]
+                                                           (let [[_ callback] (first (get-in @(:callbacks @web3-events) [contract event]))]
+                                                             (smart-contracts/subscribe-events contract
+                                                                                               event
+                                                                                               {:from-block last-block-number}
+                                                                                               callback)))]
+                                       (log/info "Subscribed to future events" {:events (keys events)})
+                                       (swap! (:event-filters @web3-events) (fn [_ new] new) event-filters))
+
+                                     )
+
+                             )
+
   (safe-go
    (let [last-block-number (<? (web3-eth/get-block-number @web3))
          event-filters (doall
@@ -81,7 +99,7 @@
                                                               event
                                                               {:from-block last-block-number}
                                                               callback))))]
-     (log/warn "Started dispatching event filters" {:events (keys events)})
+     (log/info "Subscribed to future events" {:events (keys events)})
      (swap! (:event-filters @web3-events) (fn [_ new] new) event-filters))))
 
 (defn- dispatch-after-past-events-callbacks! []
@@ -111,6 +129,6 @@
                :event-filters (atom nil)}))
 
 (defn stop [web3-events]
-  (log/warn "Stopping web3-events" (:events @web3-events))
+  (log/info "Stopping web3-events" (:events @web3-events))
   (doseq [subscription @(:event-filters @web3-events)]
-    (web3-eth/unsubscribe @web3 filter)))
+    (web3-eth/unsubscribe @web3 subscription)))

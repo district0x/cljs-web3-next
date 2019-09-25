@@ -10,7 +10,7 @@
   (-contract-at [this provider abi address])
   (-get-transaction-receipt [this provider tx-hash])
   (-accounts [this provider])
-  (-get-block-number [this provider])
+  (-get-block-number [this provider & [callback]])
   (-get-block [this provider block-hash-or-number return-transactions? & [callback]])
   (-contract-call [this contract-instance method args opts])
   (-contract-send [this contract-instance method args opts])

@@ -24,8 +24,8 @@
     (js-invoke (aget provider "eth") "getTransactionReceipt" tx-hash))
   (-accounts [_ provider]
     (js-invoke (aget provider "eth") "getAccounts"))
-  (-get-block-number [_ provider]
-    (js-invoke (aget provider "eth") "getBlockNumber"))
+  (-get-block-number [_ provider & [callback]]
+    (apply js-invoke (aget provider "eth") "getBlockNumber" (remove nil? [callback])))
   (-get-block [_ provider block-hash-or-number return-transactions? & [callback]]
     (js-invoke (aget provider "eth") "getBlock" block-hash-or-number return-transactions? callback))
   (-contract-call [_ contract-instance method args opts]
@@ -33,7 +33,9 @@
   (-contract-send [_ contract-instance method args opts]
     (js-invoke (apply js-invoke (aget contract-instance "methods") (web3-utils/camel-case (name method)) args) "send" (clj->js opts)))
   (-subscribe-events [_ contract-instance event opts & [callback]]
-    ((aget contract-instance "events" (web3-utils/camel-case (name event))) (web3-utils/cljkk->js opts) callback))
+    (js-invoke (aget contract-instance "events") (web3-utils/camel-case (name event)) (web3-utils/cljkk->js opts) callback)
+    ;; ((aget contract-instance "events" (web3-utils/camel-case (name event))) (web3-utils/cljkk->js opts) callback)
+    )
   (-subscribe-logs [_ provider contract-instance opts & [callback]]
     (js-invoke (aget provider "eth") "subscribe" "logs" (web3-utils/cljkk->js opts) callback))
   (-decode-log [_ provider abi data topics]

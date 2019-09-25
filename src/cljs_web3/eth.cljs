@@ -13,8 +13,8 @@
 (defn accounts [{:keys [:instance :provider]}]
   (api/-accounts instance provider))
 
-(defn get-block-number [{:keys [:instance :provider]}]
-  (api/-get-block-number instance provider))
+(defn get-block-number [{:keys [:instance :provider]} & [callback]]
+  (api/-get-block-number instance provider callback))
 
 (defn get-block [{:keys [:instance :provider]} block-hash-or-number return-transactions? & [callback]]
   (api/-get-block instance provider block-hash-or-number return-transactions? callback))

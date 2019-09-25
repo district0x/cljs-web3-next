@@ -104,34 +104,6 @@
     (sequential? contract) (instance (first contract) (second contract))
     :else contract))
 
-#_(defn- wait-for-tx-receipt*
-    "callback is a nodejs style callback i.e. (fn [error data] ...)"
-    [tx-hash callback]
-    (web3-eth/get-transaction-receipt @web3 tx-hash (fn [error receipt]
-                                                      (if error
-                                                        (callback error nil)
-                                                        (if receipt
-                                                          (callback nil receipt)
-                                                          (js/setTimeout #(wait-for-tx-receipt* tx-hash callback) 1000))))))
-
-#_(defn wait-for-tx-receipt
-    "blocks until transaction `tx-hash` gets sent to the network. returns js/Promise"
-    [tx-hash]
-    (js/Promise. (fn [resolve reject]
-                   (wait-for-tx-receipt* tx-hash (fn [error tx-receipt]
-                                                   (if error
-                                                     (reject error)
-                                                     (resolve tx-receipt)))))))
-
-#_(defn wait-for-tx-receipt
-    "blocks until transaction `tx-hash` gets sent to the network. returns js/Promise"
-    [tx-hash]
-    (promise-> (web3-eth/get-transaction-receipt @web3 tx-hash)
-               (fn [receipt]
-                 (if receipt
-                   receipt
-                   (js/setTimeout #(wait-for-tx-receipt tx-hash) 1000)))))
-
 (defn contract-call
   "Will call a method and execute its smart contract method in the EVM without sending any transaction.
    # arguments:
@@ -224,6 +196,34 @@
                                     opts)
                              (fn [error event]
                                (callback error (web3-utils/js->cljkk event))))))
+
+#_(defn- wait-for-tx-receipt*
+    "callback is a nodejs style callback i.e. (fn [error data] ...)"
+    [tx-hash callback]
+    (web3-eth/get-transaction-receipt @web3 tx-hash (fn [error receipt]
+                                                      (if error
+                                                        (callback error nil)
+                                                        (if receipt
+                                                          (callback nil receipt)
+                                                          (js/setTimeout #(wait-for-tx-receipt* tx-hash callback) 1000))))))
+
+#_(defn wait-for-tx-receipt
+    "blocks until transaction `tx-hash` gets sent to the network. returns js/Promise"
+    [tx-hash]
+    (js/Promise. (fn [resolve reject]
+                   (wait-for-tx-receipt* tx-hash (fn [error tx-receipt]
+                                                   (if error
+                                                     (reject error)
+                                                     (resolve tx-receipt)))))))
+
+#_(defn wait-for-tx-receipt
+    "blocks until transaction `tx-hash` gets sent to the network. returns js/Promise"
+    [tx-hash]
+    (promise-> (web3-eth/get-transaction-receipt @web3 tx-hash)
+               (fn [receipt]
+                 (if receipt
+                   receipt
+                   (js/setTimeout #(wait-for-tx-receipt tx-hash) 1000)))))
 
 #_(defn contract-event-in-tx [tx-hash contract event-name & args]
     (let [instance (instance-from-arg contract)

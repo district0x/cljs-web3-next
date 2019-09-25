@@ -10,7 +10,7 @@
             [mount.core :as mount]
             [taoensso.timbre :as log]
             [district.shared.smart-contracts :as smart-contracts-dev]
-            [district.shared.async-helpers :as async-helpers :refer [promise->]]
+            [district.shared.async-helpers :as async-helpers :refer [safe-go <? promise->]]
             [web3.impl.web3js :as web3js]
             [cljs-web3.core :as web3-core]
             [cljs-web3.eth :as web3-eth]
@@ -50,7 +50,6 @@
 
 (set! *main-cli-fn* -main)
 
-;; IN-PROGRESS : syncer for MyContract
 ;; TODO : generator for MyContract
 (defn test-it []
   (let [events {:my-contract/set-counter-event [:my-contract :SetCounterEvent]}
@@ -86,40 +85,41 @@
                                                                              (log/debug "Finished replaying past events"))})
 
                ;; watch for new events
-               #(web3-eth/get-block-number web3-inst)
-               (fn [last-block-number]
-                 (let [event-emitter (smart-contracts/subscribe-events :my-contract
-                                                                       :SetCounterEvent
-                                                                       {:from-block last-block-number}
-                                                                       (fn [error tx]
-                                                                         (log/debug "new event subscribe-events/callback" {:tx tx})))]
+               ;; #(web3-eth/get-block-number web3-inst #_(fn [_ block-number]
+               ;;                                         (log/debug "Last block number" {:number block-number})))
+               ;; (fn [last-block-number]
+               ;;   (let [event-emitter (smart-contracts/subscribe-events :my-contract
+               ;;                                                         :SetCounterEvent
+               ;;                                                         {:from-block last-block-number}
+               ;;                                                         (fn [error tx]
+               ;;                                                           (log/debug "new event subscribe-events/callback" {:tx tx})))]
 
-                   #_(web3-eth/on web3-inst event-emitter :data (fn [tx]
-                                                                (log/debug "new event subscribe-events/on-data" {:tx tx})))
+               ;;     #_(web3-eth/on web3-inst event-emitter :data (fn [tx]
+               ;;                                                  (log/debug "new event subscribe-events/on-data" {:tx tx})))
 
-                   (reset! new-sub event-emitter)))
-               #_(fn [last-block-number]
-                   (let [event-emitter (smart-contracts/subscribe-logs :my-contract
-                                                                       :SetCounterEvent
-                                                                       {:from-block last-block-number}
-                                                                       (fn [error tx]
-                                                                         (log/debug "new event subscribe-logs/callback" {:tx tx})))]
+               ;;     (reset! new-sub event-emitter)))
+               ;; #_(fn [last-block-number]
+               ;;     (let [event-emitter (smart-contracts/subscribe-logs :my-contract
+               ;;                                                         :SetCounterEvent
+               ;;                                                         {:from-block last-block-number}
+               ;;                                                         (fn [error tx]
+               ;;                                                           (log/debug "new event subscribe-logs/callback" {:tx tx})))]
 
-                   #_(web3-eth/on web3-inst event-emitter :data (fn [tx]
-                                                                (log/debug "new event subscribe-logs/on-data" {:tx tx})))
+               ;;     #_(web3-eth/on web3-inst event-emitter :data (fn [tx]
+               ;;                                                  (log/debug "new event subscribe-logs/on-data" {:tx tx})))
 
-                   (reset! new-sub event-emitter)))
+               ;;     (reset! new-sub event-emitter)))
 
-               ;; #(smart-contracts/contract-call :my-contract :counter)
-               ;; #(prn "result:" %)
+               ;; ;; #(smart-contracts/contract-call :my-contract :counter)
+               ;; ;; #(prn "result:" %)
 
                #(smart-contracts/contract-send :my-contract :set-counter [3] {:gas 5000000})
-               ;; ;; #(smart-contracts/contract-send :my-contract :increment-counter [1] {:gas 5000000})
-               ;; ;; #(log/debug "send-tx-receipt" {:receipt %})
+               #(smart-contracts/contract-send :my-contract :increment-counter [1] {:gas 5000000})
+               ;; #(log/debug "send-tx-receipt" {:receipt %})
 
-               #(web3-eth/unsubscribe web3-inst @new-sub (fn [err succ]
-                                                           (if succ
-                                                             (log/debug "Succesfully unsubscribed" {:return succ})
-                                                             (log/debug "Error unsubscribing" {:error err}))))
+               ;; #(web3-eth/unsubscribe web3-inst @new-sub (fn [err succ]
+               ;;                                             (if succ
+               ;;                                               (log/debug "Succesfully unsubscribed" {:return succ})
+               ;;                                               (log/debug "Error unsubscribing" {:error err}))))
 
                )))
