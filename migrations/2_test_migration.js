@@ -1,8 +1,8 @@
 const {last, copy, linkBytecode, smartContractsTemplate} = require ("./utils.js");
 const fs = require('fs');
 const edn = require("jsedn");
-const {env, contracts_build_directory, smart_contracts_path, parameters} = require ('../truffle.js');
-const web3Utils = require('web3-utils');
+const {contracts_build_directory, smart_contracts_path} = require ('../truffle.js');
+// const web3Utils = require('web3-utils');
 
 // copy artifacts for placeholder replacements
 copy ("MyContract", "MyContractCp", contracts_build_directory);
@@ -54,7 +54,7 @@ module.exports = function(deployer, network, accounts) {
            ]));
 
          console.log (smartContracts);
-         // fs.writeFileSync(smart_contracts_path, smartContractsTemplate (smartContracts, env));
+         fs.writeFileSync(smart_contracts_path, smartContractsTemplate (smartContracts, "test"));
        })
     .catch(console.error);
 
