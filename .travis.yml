@@ -2,7 +2,7 @@ dist: xenial
 language: clojure
 node_js:
 - '11'
-script: lein with-profile "dev" doo node "nodejs-tests" once
+script: lein doo node "nodejs-tests" once
 notifications:
   email: false
   slack:

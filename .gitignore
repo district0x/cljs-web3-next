@@ -1,5 +1,4 @@
 .nrepl-port
-.projectile
 .rebel_readline_history
 dev-server/
 figwheel_server.log

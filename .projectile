@@ -1,0 +1,6 @@
+-/dev-server
+-/node_modules
+-figwheel_server.log
+-package-lock.json
+-/target/
+-yarn.lock
