@@ -1,7 +1,7 @@
-dist: xenial
+dist: bionic
 language: clojure
 jdk:
-- oraclejdk9
+- openjdk8
 node_js:
 - '11'
 script: lein doo node "nodejs-tests" once
