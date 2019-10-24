@@ -16,7 +16,7 @@
                           [karma-chrome-launcher "2.2.0"]
                           [karma-cli "1.0.1"]
                           [karma-cljs-test "0.1.0"]
-                          ;; For deploying ontracts
+                          ;; For deploying contracts
                           [jsedn "0.4.1"]]}
 
   :profiles {:dev {:dependencies [[org.clojure/clojure "1.10.1"]
