@@ -15,7 +15,6 @@ before_install:
 - nvm use 11.14.0
 - npm install -g truffle@4.1.14
 - npm install -g ganache-cli@6.1.8
-- lein npm install
 before_script:
 - ganache-cli -d -m district0x -p 8549 -l 8000000 > /dev/null &
 - truffle migrate --network ganache --reset
