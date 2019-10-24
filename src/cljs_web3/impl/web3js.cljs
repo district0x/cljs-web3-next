@@ -19,9 +19,6 @@
      :provider (js-invoke provider "extend" (web3-helpers/cljkk->js {:property property
                                                                      :methods methods}))})
   (-is-listening? [_ provider & [callback]]
-
-(prn "@@@@ is list?")
-
     (apply js-invoke (aget provider "eth" "net") "isListening" (remove nil? [callback])))
   (-connected? [_ provider]
     (aget provider "currentProvider"  "connected"))

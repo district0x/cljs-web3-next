@@ -2,9 +2,6 @@
   (:require [cljs-web3.api :as api]))
 
 (defn is-listening? [{:keys [:instance :provider]} & [callback]]
-
-  (prn "@@@@ is list?")
-
   (api/-is-listening? instance provider callback))
 
 (defn contract-at [{:keys [:instance :provider]} abi address]
