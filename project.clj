@@ -4,9 +4,9 @@
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
 
-  :dependencies [[org.clojure/clojurescript "1.10.520"]
-                 [camel-snake-kebab "0.4.0"]
-                 [district0x/bignumber "1.0.3"]]
+  :dependencies [[camel-snake-kebab "0.4.0"]
+                 [district0x/bignumber "1.0.3"]
+                 [org.clojure/clojurescript "1.10.520"]]
 
   :doo {:paths {:karma "./node_modules/karma/bin/karma"}}
 
@@ -19,8 +19,8 @@
                           ;; For deploying contracts
                           [jsedn "0.4.1"]]}
 
-  :profiles {:dev {:dependencies [[org.clojure/clojure "1.10.1"]
-                                  [district0x/async-helpers "0.1.3"]]
+  :profiles {:dev {:dependencies [[district0x/async-helpers "0.1.3"]
+                                  [org.clojure/clojure "1.10.1"]]
                    :plugins [[lein-npm "0.6.2"]
                              [lein-cljsbuild "1.1.7"]
                              [lein-doo "0.1.8"]]
