@@ -3,7 +3,7 @@
                    [cljs.core.async.macros :refer [go]])
   (:require [cljs.test :as t]
             [cljs-web3.macros]
-            [macros :refer [slurpit]]
+            [tests.macros :refer [slurpit]]
             [cljs-web3.core :as web3-core]
             [cljs-web3.eth :as web3-eth]
             [cljs-web3.helpers :as web3-helpers]
