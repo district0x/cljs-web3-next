@@ -1,7 +1,5 @@
 dist: bionic
 language: clojure
-jdk:
-- openjdk8
 node_js:
 - '11'
 script: lein doo node "nodejs-tests" once
