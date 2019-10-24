@@ -1,4 +1,4 @@
-(defproject cljs-web3-next "0.0.9"
+(defproject cljs-web3-next "0.0.9-SNAPSHOT"
   :description "ClojureScript Web3 library with swappable backends."
   :url "https://github.com/district0x/cljs-web3-next"
   :license {:name "Eclipse Public License"
