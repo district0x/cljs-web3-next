@@ -31,7 +31,7 @@
                    address (-> smart-contracts :my-contract :address)
                    my-contract (web3-eth/contract-at web3 abi address)
                    event-interface (web3-helpers/event-interface my-contract :SetCounterEvent)
-                   event-emmiter (web3-eth/subscribe-events web3
+                   event-emitter (web3-eth/subscribe-events web3
                                                             my-contract
                                                             :SetCounterEvent
                                                             {:from-block (inc block-number)}
@@ -47,19 +47,15 @@
                                                   [3]
                                                   {:from (first accounts)
                                                    :gas 4000000}))
-
-                   ]
-
-               ;; TODO : get past events
-
-               (prn "tx" tx)
-               ;; (prn "interface" event-interface)
-
+                   past-events (<! (web3-eth/get-past-events web3
+                                                             my-contract
+                                                             :SetCounterEvent
+                                                             {:from-block block-number}))]
                (is connected?)
                (is (= 10 (count accounts)))
                (is (int? block-number))
                (is (map? block))
-
-               (web3-eth/unsubscribe web3 event-emmiter)
+               (is (= "3" (:new-value (web3-helpers/return-values->clj (aget past-events "0" "returnValues") event-interface))))
+               (web3-eth/unsubscribe web3 event-emitter)
                (web3-core/disconnect web3)
                (done))))))
