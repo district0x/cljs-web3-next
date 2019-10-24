@@ -20,6 +20,8 @@
                           ;; For deploying
                           [jsedn "0.4.1"]]}
 
+  ;; :source-paths ["src" "test"]
+
   :profiles {:dev {:dependencies [[org.clojure/clojure "1.10.1"]
                                   [district0x/async-helpers "0.1.3"]
                                   ]
