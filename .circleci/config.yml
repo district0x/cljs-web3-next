@@ -4,12 +4,13 @@ jobs:
   test:
     working_directory: ~/ci
     docker:
+      # Primary container image where all steps run.
       - image: district0x/cljs-dev
+      # Secondary container image on common network.
+      - image: trufflesuite/ganache-cli:latest
+        command: [-d -m district0x -h 0.0.0.0 -p 8549 -l 8000000]
     steps:
       - checkout
-      - run: ganache-cli -d -m district0x -h 0.0.0.0 -p 8549 -l 8000000 > /dev/null &
-      - run: apt-get install net-tools lsof
-      - run: netstat -atu
       - run: truffle migrate --network ganache --reset
       - run: lein npm install
       - run: lein doo node "nodejs-tests" once
