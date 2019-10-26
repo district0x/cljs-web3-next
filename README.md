@@ -1,6 +1,6 @@
 # cljs-web3-next
 
-[![Build Status](https://travis-ci.org/district0x/cljs-web3-next.svg?branch=master)](https://travis-ci.org/district0x/cljs-web3-next)
+[![CircleCI](https://circleci.com/gh/district0x/cljs-web3-next/tree/master.svg?style=svg&circle-token=d5db014fe5702d820bb4bb42c93959d02fa8ddba)](https://circleci.com/gh/district0x/cljs-web3-next/tree/master)
 
 This ClojureScript library provides a API for interacting with [Ethereum](https://www.ethereum.org/) nodes.
 It uses a [bridge pattern](https://en.wikipedia.org/wiki/Bridge_pattern) to decouple its API from the subsequent implementations, allowing the latter to vary at runtime.
@@ -61,20 +61,130 @@ Latest released version of this library: <br>
 
 ### <a name="api"></a>`cljs-web3.api`
 
+This namespace contains the API of this library which the participating implementations need to implement.
+
 ### <a name="core"></a>`cljs-web3.core`
-#### <a name="http-provider">`http-provider`
-#### <a name="connection-url" >`connection-url`
+
+Core functions which deal with creating and checking the status of Web3 connections.
+
 #### <a name="websocket-provider" >`websocket-provider`
+
+This function is the gateway to using the library.
+Most other functions will take the map it returns as their first argument, unless specified otherwise.
+
+It creates a Web3 instance over a websocket connection.
+Takes an instance of the [Web3Api](#api) protocol and the url as parameters.
+Returns a map with two keys:
+- `:instance` : the instance of the implementation of the API, same as you have passed it
+- `:provider` : the websocket
+
+For example to use the Web3JS implementation:
+
+```clojure
+(ns my-district
+  (:require [cljs-web3.core :as web3-core]
+            [web3.impl.web3js :as web3js]))
+
+(def web3 (web3-core/websocket-provider (web3js/new) "ws://127.0.0.1:8545"))
+```
+
+#### <a name="http-provider">`http-provider`
+
+Similar to [websocket-provider](#websocket-provider), but creates a Web3 instance over HTTP.
+
 #### <a name="extend">`extend`
+
+Allows for extending the Web3 object with any supported [JSON RPC](https://github.com/ethereum/wiki/wiki/JSON-RPC#json-rpc-methods) method, which is otherwise not a part of this library.
+Takes as arguments:
+- a map returned by the [websocket-provider](#websocket-provider) or [http-provider](#http-provider) function.
+- the module name (a keyword)
+- a colection of `method` maps with following keys:
+  - `name` : Name of the method to add
+  - `call` : The RPC method name
+  - `params` : The number of parameters for that call (optional)
+
+Example:
+
+```clojure
+(extend web3
+ :evm
+ [{:name "increaseTime"
+   :call "evm_increaseTime"
+   :params 1})])
+```
+
+Returns the same web3 map as passed, but now the provider is extended with the [`increaseTime`]() method in the `evm` module, which you can invoke like this:
+
+```clojure
+(.increaseTime (aget web3 :provider "evm") 1000)
+```
+
+#### <a name="connection-url" >`connection-url`
+
+Takes as arguments a map returned by the [provider](#websocket-provider) function and returns the URL of the node it is connected to.
+
+```clojure
+(connection-url web3)
+;; "ws://127.0.0.1:8545"
+```
+
 #### <a name="connected?">`connected?`
+
+Takes as arguments a map returned by the [provider](#websocket-provider) function and returns the connection status as a boolean value.
+This function is synchronous, for an asynchronous method see [is-listening?](@is-listening?).
+
 #### <a name="disconnect">`disconnect`
+
+Immediately disconnects the [provider](#websocket-provider), returns `nil`.
+
+```clojure
+(disconnect web3)
+```
+
 #### <a name="on-connect">`on-connect`
+
+Takes a [provider](#websocket-provider) map and a callback function as arguments, callback is executed when the connection is established.
+
+```clojure
+(web3-core/on-connect web3 (fn [event] (prn "just connected")))
+```
+
 #### <a name="on-disconnect">`on-disconnect`
+
+Takes a [provider](#websocket-provider) map and a callback as arguments, callback is executed when the connection is dropped.
+
+```clojure
+(web3-core/on-disconnect web3 (fn [event] (prn "your web3 socket has lost its connection")))
+```
+
 #### <a name="on-error">`on-error`
 
+Similar as [on-connect](#on-connect) and [on-disconnect](#on-disconnect) but executes the callback when connection throws an error.
+
 ### <a name="eth" >`cljs-web3.eth`
+
+This namespace contains functions for interacting with the Ethereum blockchain and Ethereum smart contracts.
+
 #### <a name= "is-listening?">`is-listening?`
+
+Asynchronous version of the [connected?](#connected?) function, takes the [provider](#websocket-provider) map and a callback function.
+Returns a JS/Promise which returns a boolean.
+
+You can use it to set a periodically executing connection healthcheck:
+
+```clojure
+(js/setInterval (fn []
+                  (is-listening? web3
+                                 (fn [_ connected?]
+                                   (when-not connected?
+                                     (reset-connection)))))
+                3000)
+```
+
 #### <a name= "contract-at">`contract-at`
+
+
+
 #### <a name= "get-transaction-receipt">`get-transaction-receipt`
 #### <a name= "accounts">`accounts`
 #### <a name= "get-block-number">`get-block-number`

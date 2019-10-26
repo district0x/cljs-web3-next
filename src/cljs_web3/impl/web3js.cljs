@@ -9,9 +9,11 @@
 (defrecord+ Web3Js []
   Web3Api
   (-http-provider [_ uri]
-    (new Web3 (new (aget Web3 "providers" "HttpProvider") uri)))
+    {:instance _
+     :provider (new Web3 (new (aget Web3 "providers" "HttpProvider") uri))})
   (-websocket-provider [_ uri]
-    (new Web3 (new (aget Web3 "providers" "WebsocketProvider") uri)))
+    {:instance _
+     :provider (new Web3 (new (aget Web3 "providers" "WebsocketProvider") uri))})
   (-connection-url [_ provider]
     (aget provider "currentProvider" "connection" "_url"))
   (-extend [_ provider property methods]
@@ -21,7 +23,7 @@
   (-is-listening? [_ provider & [callback]]
     (apply js-invoke (aget provider "eth" "net") "isListening" (remove nil? [callback])))
   (-connected? [_ provider]
-    (aget provider "currentProvider"  "connected"))
+    (aget provider "currentProvider" "connected"))
   (-disconnect [_ provider]
     (js-invoke (aget provider "currentProvider") "disconnect"))
   (-on-connect [_ provider & [callback]]
