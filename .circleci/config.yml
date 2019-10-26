@@ -10,6 +10,7 @@ jobs:
       - run: ganache-cli -d -m district0x -p 8549 -l 8000000 > /dev/null &
       - run: apt-get install net-tools
       - run: netstat -atu
+      - run: lsof -i:8549
       - run: truffle migrate --network ganache --reset
       - run: lein npm install
       - run: lein doo node "nodejs-tests" once
