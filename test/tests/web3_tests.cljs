@@ -39,11 +39,7 @@
                                                               (let [evt-block-number (aget event "blockNumber")
                                                                     return-values (aget event "returnValues")
                                                                     evt-values (web3-helpers/return-values->clj return-values event-interface)]
-
-                                                                (prn "@@@@ event watcher" )
-
-                                                                (is (= "3" (:new-value evt-values)))
-                                                                (is (= (inc block-number) evt-block-number)))))
+                                                                (is (= "3" (:new-value evt-values))))))
                    tx (<! (web3-eth/contract-send web3
                                                   my-contract
                                                   :set-counter
@@ -57,24 +53,13 @@
                                                              {:from-block 0
                                                               :to-block "latest"}))]
 
-               (<! (web3-eth/contract-send web3
-                                           my-contract
-                                           :set-counter
-                                           [3]
-                                           {:from (first accounts)
-                                            :gas 4000000}))
-
                (is (= address (string/lower-case (aget my-contract "_address"))))
 
                (is connected?)
                (is (= 10 (count accounts)))
                (is (int? block-number))
                (is (map? block))
-
-               (prn "PAST EVTS" past-events block-number)
-
-               ;; (is (= "3" (:new-value (web3-helpers/return-values->clj (aget past-events "0" "returnValues") event-interface))))
-
+               (is (= "3" (:new-value (web3-helpers/return-values->clj (aget past-events "0" "returnValues") event-interface))))
 
                (web3-eth/unsubscribe web3 event-emitter)
                (web3-core/disconnect web3)
