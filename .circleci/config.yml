@@ -7,7 +7,7 @@ jobs:
       - image: district0x/cljs-dev
     steps:
       - checkout
-      - run: ganache-cli -d -m district0x -p 8549 -l 8000000 > /dev/null &
+      - run: ganache-cli -d -m district0x -h 0.0.0.0 -p 8549 -l 8000000 > /dev/null &
       - run: apt-get install net-tools
       - run: netstat -atu
       - run: lsof -i:8549
