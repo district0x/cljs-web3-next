@@ -21,7 +21,7 @@
 (deftest test-web3 []
   (let [inst (web3js/new)
         web3 {:instance inst
-              :provider (web3-core/websocket-provider inst "ws://127.0.0.1:8549")}]
+              :provider (web3-core/websocket-provider inst "ws://127.0.0.1:8545")}]
     (async done
            (go
              (let [connected? (<! (web3-eth/is-listening? web3))
