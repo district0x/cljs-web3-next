@@ -51,6 +51,9 @@
                                                              my-contract
                                                              :SetCounterEvent
                                                              {:from-block block-number}))]
+
+               (prn "CONTRACT" my-contract)
+
                (is connected?)
                (is (= 10 (count accounts)))
                (is (int? block-number))

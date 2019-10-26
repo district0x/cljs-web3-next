@@ -6,7 +6,6 @@
 
 (nodejs/enable-util-print!)
 
-(defn -main [& _]
-  (run-tests 'tests.web3-tests))
+(run-tests 'tests.web3-tests)
 
 (set! *main-cli-fn* -main)
