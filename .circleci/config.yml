@@ -11,8 +11,8 @@ jobs:
         command: [-d -m district0x -h 0.0.0.0 -p 8549 -l 8000000]
     steps:
       - checkout
-      - run: truffle migrate --network ganache --reset
       - run: lein npm install
+      - run: truffle migrate --network ganache --reset
       - run: lein doo node "nodejs-tests" once
 
   deploy:
