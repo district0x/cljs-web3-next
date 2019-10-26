@@ -40,7 +40,7 @@
                                                                     return-values (aget event "returnValues")
                                                                     evt-values (web3-helpers/return-values->clj return-values event-interface)]
 
-                                                                (prn "@@@" (:new-value evt-values))
+                                                                (prn "@@@@ event watcher" )
 
                                                                 (is (= "3" (:new-value evt-values)))
                                                                 (is (= (inc block-number) evt-block-number)))))
@@ -50,11 +50,19 @@
                                                   [3]
                                                   {:from (first accounts)
                                                    :gas 4000000}))
+                   tx-receipt (<! (web3-eth/get-transaction-receipt web3 (aget tx "transactionHash")))
                    past-events (<! (web3-eth/get-past-events web3
                                                              my-contract
                                                              :SetCounterEvent
                                                              {:from-block 0
-                                                              :to-block (+ 20 block-number)}))]
+                                                              :to-block "latest"}))]
+
+               (<! (web3-eth/contract-send web3
+                                           my-contract
+                                           :set-counter
+                                           [3]
+                                           {:from (first accounts)
+                                            :gas 4000000}))
 
                (is (= address (string/lower-case (aget my-contract "_address"))))
 
@@ -63,7 +71,7 @@
                (is (int? block-number))
                (is (map? block))
 
-               (prn past-events  )
+               (prn "PAST EVTS" past-events block-number)
 
                ;; (is (= "3" (:new-value (web3-helpers/return-values->clj (aget past-events "0" "returnValues") event-interface))))
 

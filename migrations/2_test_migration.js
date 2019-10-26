@@ -1,8 +1,8 @@
-const {last, copy, linkBytecode, smartContractsTemplate} = require ("./utils.js");
 const fs = require('fs');
 const edn = require("jsedn");
+
+const {last, copy, linkBytecode, smartContractsTemplate} = require ("./utils.js");
 const {contracts_build_directory, smart_contracts_path} = require ('../truffle.js');
-// const web3Utils = require('web3-utils');
 
 // copy artifacts for placeholder replacements
 copy ("MyContract", "MyContractCp", contracts_build_directory);
@@ -36,8 +36,7 @@ module.exports = function(deployer, network, accounts) {
       return deployer.deploy(Forwarder, Object.assign(opts, {gas: gas}))
     })
     .then ((forwader) => Promise.all ([MyContract.deployed (),
-                                       forwader
-                                      ]))
+                                       forwader]))
     .then ((
       [myContract,
        forwarder]) => {
