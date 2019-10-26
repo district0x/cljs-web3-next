@@ -1,0 +1,31 @@
+version: 2.1
+jobs:
+
+  test:
+    docker:
+      - image: nodrama/cljs-dev:latest
+    steps:
+      - checkout
+      - run: lein npm install
+      - run: lein deps
+      - run: lein doo node "nodejs-tests" once
+
+  deploy:
+   machine: true
+   steps:
+     - checkout
+     - run:
+         name: Deploy to clojars
+         command: lein release :patch
+
+workflows:
+  version: 2
+  build_and_deploy:
+    jobs:
+      - test
+      - deploy:
+          requires:
+            - test
+          filters:
+            branches:
+              only: master

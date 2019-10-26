@@ -20,7 +20,6 @@
                           [jsedn "0.4.1"]]}
 
   :profiles {:dev {:dependencies [[district0x/async-helpers "0.1.3"]
-                                  [org.clojure/core.async "0.4.490"]
                                   [org.clojure/clojure "1.10.1"]]
                    :plugins [[lein-npm "0.6.2"]
                              [lein-cljsbuild "1.1.7"]
