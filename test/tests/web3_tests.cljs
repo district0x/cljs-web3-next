@@ -8,13 +8,13 @@
             [cljs-web3.eth :as web3-eth]
             [cljs-web3.helpers :as web3-helpers]
             [cljs.nodejs :as nodejs]
+            [clojure.string :as string]
             [cljs.core.async :refer [<!] :as async]
             [tests.smart-contracts-test :refer [smart-contracts]]
             [district.shared.async-helpers :as async-helpers]
             [web3.impl.web3js :as web3js]))
 
 (async-helpers/extend-promises-as-channels!)
-;; (nodejs/enable-util-print!)
 
 (def abi (aget (js/JSON.parse (slurpit "./resources/public/contracts/build/MyContract.json")) "abi"))
 
@@ -34,11 +34,14 @@
                    event-emitter (web3-eth/subscribe-events web3
                                                             my-contract
                                                             :SetCounterEvent
-                                                            {:from-block (inc block-number)}
+                                                            {:from-block block-number}
                                                             (fn [_ event]
                                                               (let [evt-block-number (aget event "blockNumber")
                                                                     return-values (aget event "returnValues")
                                                                     evt-values (web3-helpers/return-values->clj return-values event-interface)]
+
+                                                                (prn "@@@" (:new-value evt-values))
+
                                                                 (is (= "3" (:new-value evt-values)))
                                                                 (is (= (inc block-number) evt-block-number)))))
                    tx (<! (web3-eth/contract-send web3
@@ -50,15 +53,21 @@
                    past-events (<! (web3-eth/get-past-events web3
                                                              my-contract
                                                              :SetCounterEvent
-                                                             {:from-block block-number}))]
+                                                             {:from-block 0
+                                                              :to-block (+ 20 block-number)}))]
 
-               (prn "CONTRACT" my-contract)
+               (is (= address (string/lower-case (aget my-contract "_address"))))
 
                (is connected?)
                (is (= 10 (count accounts)))
                (is (int? block-number))
                (is (map? block))
-               (is (= "3" (:new-value (web3-helpers/return-values->clj (aget past-events "0" "returnValues") event-interface))))
+
+               (prn past-events  )
+
+               ;; (is (= "3" (:new-value (web3-helpers/return-values->clj (aget past-events "0" "returnValues") event-interface))))
+
+
                (web3-eth/unsubscribe web3 event-emitter)
                (web3-core/disconnect web3)
                (done))))))
