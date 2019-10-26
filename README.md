@@ -1,6 +1,6 @@
 # cljs-web3-next
 
-[![CircleCI](https://circleci.com/gh/district0x/cljs-web3-next/tree/master.svg?style=svg&circle-token=d5db014fe5702d820bb4bb42c93959d02fa8ddba)](https://circleci.com/gh/district0x/cljs-web3-next/tree/master)
+[![CircleCI](https://circleci.com/gh/district0x/cljs-web3-next/tree/master.svg?style=svg)](https://circleci.com/gh/district0x/cljs-web3-next/tree/master)
 
 This ClojureScript library provides a API for interacting with [Ethereum](https://www.ethereum.org/) nodes.
 It uses a [bridge pattern](https://en.wikipedia.org/wiki/Bridge_pattern) to decouple its API from the subsequent implementations, allowing the latter to vary at runtime.
@@ -74,7 +74,7 @@ Most other functions will take the map it returns as their first argument, unles
 
 It creates a Web3 instance over a websocket connection.
 Takes an instance of the [Web3Api](#api) protocol and the url as parameters.
-Returns a map with two keys:
+Returns a map (the provider map) with two keys:
 - `:instance` : the instance of the implementation of the API, same as you have passed it
 - `:provider` : the websocket
 
@@ -183,14 +183,93 @@ You can use it to set a periodically executing connection healthcheck:
 
 #### <a name= "contract-at">`contract-at`
 
+Takes a provider map, contract [abi](https://solidity.readthedocs.io/en/v0.5.3/abi-spec.html#abi-json) interface as returned by the [solc](https://solidity.readthedocs.io/en/v0.5.3/using-the-compiler.html#compiler-input-and-output-json-description) compiler (in a JSON format).
+Returns a Contract instance.
 
+```
+(def abi (aget (.readFileSync js/fs MyContract.json) "abi))
+
+(contract-at web3 abi "0x98f93ed24052ceed35741beee1d75287cb297137")
+```
 
 #### <a name= "get-transaction-receipt">`get-transaction-receipt`
+Takes a provider map, transaction hash (a String) and an optional callback function.
+Returns a JS/Promise which evaluates to the receipt of that transaction.
+
+```clojure
+(get-transaction-receipt web3 "0xd5000d0de00e50d6ac47fe48d11d9dc8258e74fc69b57b5c804e7ddc424af8d0" (fn [tx] (prn "I got the receipt" tx))
+```
+
 #### <a name= "accounts">`accounts`
+
+Returns the availiable ethereum accounts.
+
+```
+(accounts web3)
+```
+
 #### <a name= "get-block-number">`get-block-number`
+
+Takes a web3 map and an optional callback as arguments.
+Returns a JS/Promise which evaluates to the current block number.
+
+```
+(get-block-number web3)
+```
+
 #### <a name= "get-block">`get-block`
+
+Takes as arguments:
+
+- a web3 map
+- a block number or hash
+- a boolean parameter specifying whether to include the transactions
+- an optional callback
+
+Returns a JS/Promise which evaluates to the representation of the last mined block.
+
+```
+(get-block web3 block-number false)
+```
+
 #### <a name= "encode-abi">`encode-abi`
+
+This function returns a raw transaction.
+
+It takes as arguments:
+- the [provider](#websocket-provider) map
+- smart contract instance, as returned by the [contract-at](#contract-at) function
+- the kebab-cased keyword with the name of the smart contracts function
+- a vector with the arguments of the function
+
+Returns a string.
+
+```
+(encode-abi web3 my-contract :set-counter [3])
+```
+
 #### <a name= "contract-call">`contract-call`
+
+This function executes a statless (read only) method of a smart contract.
+
+It takes as arguments:
+- the [provider](#websocket-provider) map
+- smart contract instance, as returned by the [contract-at](#contract-at) function
+- the kebab-cased keyword with the name of the smart contracts function to execute
+- a vector with the arguments of the function
+- map of options:
+ - `:from` : the account calling the contract (see [accounts](#accounts))
+
+Returns a JS/Promise which evaluates to the return value of that function.
+
+```
+(web3-eth/contract-call web3
+                        my-contract
+                        :my-plus
+                        [3 4]
+                        {:from (first accounts)})
+```
+
 #### <a name= "contract-send">`contract-send`
 #### <a name= "subscribe-events">`subscribe-events`
 #### <a name= "subscribe-logs">`subscribe-logs`

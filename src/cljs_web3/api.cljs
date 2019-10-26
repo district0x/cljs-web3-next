@@ -21,7 +21,7 @@
   (-to-wei [this provider number & [unit]])
   (-number-to-hex [this provider number])
   (-contract-at [this provider abi address])
-  (-get-transaction-receipt [this provider tx-hash])
+  (-get-transaction-receipt [this provider tx-hash & [callback]])
   (-accounts [this provider])
   (-get-block-number [this provider & [callback]])
   (-get-block [this provider block-hash-or-number return-transactions? & [callback]])

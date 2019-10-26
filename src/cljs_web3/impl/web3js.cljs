@@ -50,8 +50,8 @@
     (js-invoke (aget provider "utils") "numberToHex" arg))
   (-contract-at [_ provider abi address]
     (new (aget provider "eth" "Contract") abi address))
-  (-get-transaction-receipt [_ provider tx-hash]
-    (js-invoke (aget provider "eth") "getTransactionReceipt" tx-hash))
+  (-get-transaction-receipt [_ provider tx-hash & [callback]]
+    (apply js-invoke (aget provider "eth") "getTransactionReceipt" (remove nil? [tx-hash callback])))
   (-accounts [_ provider]
     (js-invoke (aget provider "eth") "getAccounts"))
   (-get-block-number [_ provider & [callback]]

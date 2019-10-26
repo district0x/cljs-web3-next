@@ -7,8 +7,8 @@
 (defn contract-at [{:keys [:instance :provider]} abi address]
  (api/-contract-at instance provider abi address))
 
-(defn get-transaction-receipt [{:keys [:instance :provider]} tx-hash]
- (api/-get-transaction-receipt instance provider tx-hash))
+(defn get-transaction-receipt [{:keys [:instance :provider]} tx-hash & [callback]]
+ (api/-get-transaction-receipt instance provider tx-hash callback))
 
 (defn accounts [{:keys [:instance :provider]}]
   (api/-accounts instance provider))

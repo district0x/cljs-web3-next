@@ -45,6 +45,11 @@
                                                   [3]
                                                   {:from (first accounts)
                                                    :gas 4000000}))
+                   seven (<! (web3-eth/contract-call web3
+                                                  my-contract
+                                                  :my-plus
+                                                  [3 4]
+                                                  {:from (first accounts)}))
                    tx-receipt (<! (web3-eth/get-transaction-receipt web3 (aget tx "transactionHash")))
                    past-events (<! (web3-eth/get-past-events web3
                                                              my-contract
@@ -52,10 +57,10 @@
                                                              {:from-block 0
                                                               :to-block "latest"}))]
 
-
-
+               (is (= "7" seven))
+               (is (= "0x8bb5d9c30000000000000000000000000000000000000000000000000000000000000003" (web3-eth/encode-abi web3 my-contract :set-counter [3])))
                (is (= address (string/lower-case (aget my-contract "_address"))))
-
+               (is (aget tx-receipt "status"))
                (is connected?)
                (is (= 10 (count accounts)))
                (is (int? block-number))
