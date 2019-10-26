@@ -7,7 +7,7 @@ jobs:
       - image: district0x/cljs-dev
     steps:
       - checkout
-      - run: ganache-cli -d -m district0x -p 8549 -l 8000000 > /dev/null &
+      - run: ganache-cli -d -m district0x -p 8549 -l 8000000
       - run: truffle migrate --network ganache --reset
       - run: lein npm install
       - run: lein doo node "nodejs-tests" once
