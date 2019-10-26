@@ -2,12 +2,14 @@ version: 2.1
 jobs:
 
   test:
+    working_directory: ~/ci
     docker:
-      - image: nodrama/cljs-dev:latest
+      - image: district0x/cljs-dev
     steps:
       - checkout
+      - run: ganache-cli -d -m district0x -p 8549 -l 8000000 > /dev/null &
+      - run: truffle migrate --network ganache --reset
       - run: lein npm install
-      - run: lein deps
       - run: lein doo node "nodejs-tests" once
 
   deploy:
