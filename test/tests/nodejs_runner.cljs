@@ -1,11 +1,13 @@
 (ns tests.nodejs-runner
   (:require
     [cljs.nodejs :as nodejs]
-    [cljs.test :refer [run-tests]]
+    [doo.runner :refer-macros [doo-tests]]
+    ;; [cljs.test :refer [run-tests]]
     [tests.web3-tests]))
 
 (nodejs/enable-util-print!)
 
-(run-tests 'tests.web3-tests)
+;; (run-tests 'tests.web3-tests)
 
-(set! *main-cli-fn* -main)
+(doo-tests 'tests.web3-tests)
+;; (set! *main-cli-fn* -main)

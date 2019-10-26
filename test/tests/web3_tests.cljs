@@ -14,7 +14,7 @@
             [web3.impl.web3js :as web3js]))
 
 (async-helpers/extend-promises-as-channels!)
-(nodejs/enable-util-print!)
+;; (nodejs/enable-util-print!)
 
 (def abi (aget (js/JSON.parse (slurpit "./resources/public/contracts/build/MyContract.json")) "abi"))
 
