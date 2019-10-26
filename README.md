@@ -271,13 +271,39 @@ Returns a JS/Promise which evaluates to the return value of that function.
 ```
 
 #### <a name= "contract-send">`contract-send`
+
+This function executes a state-altering (payable) method of a smart contract.
+
+It takes as arguments:
+- the [provider](#websocket-provider) map
+- smart contract instance, as returned by the [contract-at](#contract-at) function
+- the kebab-cased keyword with the name of the smart contracts function to execute
+- a vector with the arguments of the function
+- map of options:
+ - `:from` : the account calling the contract (see [accounts](#accounts))
+ - `:gas` : max amount of gas you are willing to spend
+
+Returns a JS/Promise which evaluates to the tx-hash once the transaction is mined.
+
+```
+(<! (web3-eth/contract-send web3
+                            my-contract
+                            :set-counter
+                            [3]
+                            {:from (first accounts)
+                             :gas 4000000}))
+```
+
 #### <a name= "subscribe-events">`subscribe-events`
+
+
+#### <a name= "on">`on`
 #### <a name= "subscribe-logs">`subscribe-logs`
 #### <a name= "decode-log">`decode-log`
 #### <a name= "unsubscribe">`unsubscribe`
 #### <a name= "clear-subscriptions">`clear-subscriptions`
 #### <a name= "get-past-events">`get-past-events`
-#### <a name= "on">`on`
+
 
 ### <a name="utils">`cljs-web3.utils`
 #### <a name="sha3">`sha3`

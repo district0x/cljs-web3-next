@@ -33,12 +33,26 @@
                    event-emitter (web3-eth/subscribe-events web3
                                                             my-contract
                                                             :SetCounterEvent
-                                                            {:from-block block-number}
+                                                            {:from-block (inc block-number)}
                                                             (fn [_ event]
+                                                              ;; (prn "@@@ sub/event" event)
                                                               (let [evt-block-number (aget event "blockNumber")
                                                                     return-values (aget event "returnValues")
                                                                     evt-values (web3-helpers/return-values->clj return-values event-interface)]
                                                                 (is (= "3" (:new-value evt-values))))))
+
+                   event-signature (:signature event-interface)
+                   event-log-emitter (web3-eth/subscribe-logs web3
+                                                              my-contract
+                                                              {:address address
+                                                               :topics [event-signature]
+                                                               :from-block (inc block-number)}
+                                                              (fn [_ event]
+                                                                (let [return-values (web3-eth/decode-log web3 (:inputs event-interface) (aget event "data") [event-signature])
+                                                                      evt-values (web3-helpers/return-values->clj return-values event-interface)]
+                                                                  (is (= "3" (:new-value evt-values)))
+                                                                  #_(prn "@@@ sub/logs " evt-values))))
+
                    tx (<! (web3-eth/contract-send web3
                                                   my-contract
                                                   :set-counter
@@ -68,5 +82,6 @@
                (is (= "3" (:new-value (web3-helpers/return-values->clj (aget past-events "0" "returnValues") event-interface))))
 
                (web3-eth/unsubscribe web3 event-emitter)
+               (web3-eth/unsubscribe web3 event-log-emitter)
                (web3-core/disconnect web3)
                (done))))))
