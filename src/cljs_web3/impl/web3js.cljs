@@ -14,6 +14,10 @@
   (-websocket-provider [_ uri]
     {:instance _
      :provider (new Web3 (new (aget Web3 "providers" "WebsocketProvider") uri))})
+  (-current-provider [_ provider]
+    (aget provider "currentProvider"))
+  (-set-provider [_ provider new-provider]
+    (js-invoke provider "setProvider" new-provider))
   (-connection-url [_ provider]
     (aget provider "currentProvider" "connection" "_url"))
   (-extend [_ provider property methods]

@@ -35,7 +35,6 @@
                                                             :SetCounterEvent
                                                             {:from-block (inc block-number)}
                                                             (fn [_ event]
-                                                              ;; (prn "@@@ sub/event" event)
                                                               (let [evt-block-number (aget event "blockNumber")
                                                                     return-values (aget event "returnValues")
                                                                     evt-values (web3-helpers/return-values->clj return-values event-interface)]
@@ -50,8 +49,7 @@
                                                               (fn [_ event]
                                                                 (let [return-values (web3-eth/decode-log web3 (:inputs event-interface) (aget event "data") [event-signature])
                                                                       evt-values (web3-helpers/return-values->clj return-values event-interface)]
-                                                                  (is (= "3" (:new-value evt-values)))
-                                                                  #_(prn "@@@ sub/logs " evt-values))))
+                                                                  (is (= "3" (:new-value evt-values))))))
 
                    tx (<! (web3-eth/contract-send web3
                                                   my-contract

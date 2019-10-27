@@ -4,6 +4,8 @@
 (defprotocol+ Web3Api
   (-http-provider [this uri])
   (-websocket-provider [this uri])
+  (-current-provider [this provider])
+  (-set-provider [this provider])
   (-extend [this provider property methods])
   (-connection-url [this provider])
   (-is-listening? [this provider & [callback]])
