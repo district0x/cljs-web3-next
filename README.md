@@ -9,7 +9,7 @@ In practice what this means is that future versions of the library will maintain
 
 ## Installation
 Latest released version of this library: <br>
-[![Clojars Project](https://img.shields.io/clojars/v/district0x/cljs-web3-next.svg)](https://clojars.org/district0x/cljs-web3-next)
+[![Clojars Project](https://img.shields.io/clojars/v/cljs-web3-next.svg)](https://clojars.org/cljs-web3-next)
 
 ## API Overview
 
