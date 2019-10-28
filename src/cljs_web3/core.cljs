@@ -4,14 +4,14 @@
 (defn http-provider [web3 uri]
   (api/-http-provider web3 uri))
 
-(defn connection-url [{:keys [:instance :provider]}]
-  (api/-connection-url instance provider))
-
 (defn websocket-provider [web3 uri]
   (api/-websocket-provider web3 uri))
 
-(defn current-provider [web3]
-  (api/-current-provider web3))
+(defn connection-url [{:keys [:instance :provider]}]
+  (api/-connection-url instance provider))
+
+(defn current-provider [{:keys [:instance :provider]}]
+  (api/-current-provider instance provider))
 
 (defn set-provider [{:keys [:instance :provider]} new-provider]
   (api/-set-provider instance provider new-provider))

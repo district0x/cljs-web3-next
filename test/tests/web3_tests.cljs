@@ -67,9 +67,12 @@
                                                              my-contract
                                                              :SetCounterEvent
                                                              {:from-block 0
-                                                              :to-block "latest"}))]
-
-
+                                                              :to-block "latest"}))
+                   past-logs (<! (web3-eth/get-past-logs web3
+                                                         {:address [address]
+                                                          :topics [event-signature]
+                                                          :from-block 0
+                                                          :to-block "latest"}))]
 
                (is (= "7" seven))
                (is (= "0x8bb5d9c30000000000000000000000000000000000000000000000000000000000000003" (web3-eth/encode-abi web3 my-contract :set-counter [3])))
@@ -80,6 +83,7 @@
                (is (int? block-number))
                (is (map? block))
                (is (= "3" (:new-value (web3-helpers/return-values->clj (aget past-events "0" "returnValues") event-interface))))
+               (is (= 1 (count past-logs)))
 
                (web3-eth/unsubscribe web3 event-emitter)
                (web3-eth/unsubscribe web3 event-log-emitter)

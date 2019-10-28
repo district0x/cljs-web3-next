@@ -4,8 +4,6 @@ dev-server/
 figwheel_server.log
 resources/public/contracts/build/
 node_modules/
-package-lock.json
 target/
-yarn.lock
 tests-output/
 .lein-failures

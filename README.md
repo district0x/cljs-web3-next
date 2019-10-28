@@ -16,9 +16,9 @@ Latest released version of this library: <br>
 - [cljs-web3.api](#api)
 - [cljs-web3.core](#core)
   - [http-provider](#http-provider)
-  - [connection-url](#connection-url)
   - [websocket-provider](#websocket-provider)
   - [extend](#extend)
+  - [connection-url](#connection-url)
   - [connected?](#connected?)
   - [disconnect](#disconnect)
   - [on-connect](#on-connect)
@@ -40,6 +40,7 @@ Latest released version of this library: <br>
   - [unsubscribe](#unsubscribe)
   - [clear-subscriptions](#clear-subscriptions)
   - [get-past-events](#get-past-events)
+  - [get-past-logs](#get-past-logs)
   - [on](#on)
 - [cljs-web3.utils](#utils)
   - [sha3](#sha3)
@@ -301,7 +302,7 @@ Creates a subscription listening to a specific contracts event.
 It takes as arguments:
 - the [provider](#websocket-provider) map
 - smart contract instance, as returned by the [contract-at](#contract-at) function
-- the camel-cased keyword with the name of the smart contracts event to listen to
+- the CamelCased keyword with the name of the smart contracts event to listen to
 - map of options:
   - `:from-block` : the block number (greater than or equal to) from which to get events on.
 - a nodejs-style callback function (`error` is a first parameters and `response` the second), executed each time the event is seen (optional)
@@ -330,11 +331,11 @@ It takes as arguments:
 - a nodejs-style callback function (`error` is a first parameters and `response` the second), executed each time the log is seen (optional)
 
 ```clojure
-(web3-eth/subscribe-logs web3
-                         {:address [address]
-                          :topics [event-signature]
-                          :from-block block-number}
-                         (fn [_ event] ))
+(subscribe-logs web3
+                {:address [address]
+                 :topics [event-signature]
+                 :from-block block-number}
+                (fn [_ event] (prn event))
 ```
 
 Similar to the [subscribe-events](#subscribe-events) function, it returns an `EventEmitter` which can be augmented using [on](#on).
@@ -360,20 +361,65 @@ It will add callbacks executed on specific events:
 
 ```clojure
 (-> event-emitter
-    (#(web3-eth/on web3 % :connected (fn [sub-id]
-                                       (prn "subscribed to SetCounterEvents. Subscription id :" sub-id))))
-    (#(web3-eth/on web3 % :data (fn [event]
-                                  (prn "new SetCounterEvents :" event))))
-    (#(web3-eth/on web3 % :error (fn [error]
-                                   (prn "Error :" error)))))
+    (#(on web3 % :connected (fn [sub-id]
+                              (prn "subscribed to SetCounterEvents. Subscription id :" sub-id))))
+    (#(on web3 % :data (fn [event]
+                         (prn "new SetCounterEvents :" event))))
+    (#(on web3 % :error (fn [error]
+                          (prn "Error :" error)))))
 ```
 
 #### <a name= "unsubscribe">`unsubscribe`
+
+Clears a subscription, takes a web3 provider an an event emitter (returned by the [subscribe-events](#subscribe-events) or [subscribe-logs](#subscribe-logs)) as arguments.
+
+```clojure
+(web3-eth/unsubscribe web3 event-emitter)
+ ```
+
 #### <a name= "clear-subscriptions">`clear-subscriptions`
+
+Clears all created subscription.
+
 #### <a name= "get-past-events">`get-past-events`
 
+Returns all past events for the specified contract.
+
+It takes as arguments:
+- the [provider](#websocket-provider) map
+- smart contract instance, as returned by the [contract-at](#contract-at) function
+- the CamelCased keyword with the name of the smart contracts event to replay
+- map of options:
+  - `:from-block` : the block number (greater than or equal to) from which to return the events
+  - `:to-block` : the block number (less than or equal to) up to which the events are returned
+- a nodejs-style callback function (`error` is a first parameters and `response` the second), executed each time the event is seen (optional)
+
+```clojure
+(web3-eth/get-past-events web3
+                          my-contract
+                          :SetCounterEvent
+                          {:from-block 0
+                           :to-block "latest"}
+                          (fn [events]))
+```
+
+#### <a name= "get-past-logs">`get-past-logs`
+
+A [subscribe-logs](#subscribe-logs) equivalent of [get-past-events](#get-past-events).
+
+```clojure
+(web3-eth/get-past-logs web3
+                        {:address [address]
+                         :topics [event-signature]
+                         :from-block 0
+                         :to-block "latest"}
+                        (fn [logs]))
+```
 
 ### <a name="utils">`cljs-web3.utils`
+
+
+
 #### <a name="sha3">`sha3`
 #### <a name="solidity-sha3">`solidity-sha3`
 #### <a name="from-ascii">`from-ascii`

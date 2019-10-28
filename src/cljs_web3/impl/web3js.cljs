@@ -82,6 +82,8 @@
     (js-invoke (aget provider "eth") "clearSubscriptions"))
   (-get-past-events [this contract-instance event opts & [callback]]
     (js-invoke contract-instance "getPastEvents" (web3-helpers/camel-case (name event)) (web3-helpers/cljkk->js opts) callback))
+  (-get-past-logs [this provider opts & [callback]]
+    (js-invoke (aget provider "eth") "getPastLogs" (web3-helpers/cljkk->js opts) callback))
   (-increase-time [this provider seconds]
     (js-invoke (aget provider "evm") "increaseTime" seconds))
   (-mine-block [this provider]

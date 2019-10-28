@@ -46,5 +46,8 @@
 (defn get-past-events [{:keys [:instance]} contract-instance event opts & [callback]]
   (api/-get-past-events instance contract-instance event opts callback))
 
+(defn get-past-logs [{:keys [:instance :provider]} opts & [callback]]
+  (api/-get-past-logs instance provider opts callback))
+
 (defn on [{:keys [:instance]} event-emitter event callback]
   (api/-on instance event-emitter event callback))
