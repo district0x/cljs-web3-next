@@ -21,12 +21,9 @@
 (def js->cljk #(js->clj % :keywordize-keys true))
 
 (def js->cljkk
-  "From JavaScript to Clojure with kebab-cased keywords."
   (comp (partial camel-snake-extras/transform-keys kebab-case) js->cljk))
 
 (def cljkk->js
-  "From Clojure with kebab-cased keywords to JavaScript e.g.
-  {:from-block 0 :to-block 'latest'} -> #js {:fromBlock 0, :toBlock 'latest'}"
   (comp clj->js (partial camel-snake-extras/transform-keys camel-case)))
 
 (defn method [{:keys [:name :call :params :input-formatter :output-formatter]

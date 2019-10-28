@@ -6,6 +6,7 @@
             [tests.macros :refer [slurpit]]
             [cljs-web3.core :as web3-core]
             [cljs-web3.eth :as web3-eth]
+            [cljs-web3.utils :as web3-utils]
             [cljs-web3.helpers :as web3-helpers]
             [cljs.nodejs :as nodejs]
             [clojure.string :as string]
@@ -88,4 +89,17 @@
                (web3-eth/unsubscribe web3 event-emitter)
                (web3-eth/unsubscribe web3 event-log-emitter)
                (web3-core/disconnect web3)
+
+               (is (= "0xf652222313e28459528d920b65115c16c04f3efc82aaedc97be59f3f377c0d3f"
+                      (web3-utils/solidity-sha3 web3 6)))
+
+               (is (= "0x34ee2a785aa8c43ab6ddf4bd8cd55e2cf7ee009305e966472ee22a637a2bb71f"
+                      (web3-utils/solidity-sha3 web3 "0x7d10b16dd1f9e0df45976d402879fb496c114936")))
+
+               (is (= "0x4e03657aea45a94fc7d47ba826c8d667c0d1e6e33a64a036ec44f58fa12d6c45"
+                      (web3-utils/solidity-sha3 web3 "abc")))
+
+               (is (= "0x789357bc7419b62048fc1339ce448db0836603d3c0738082337b68e2b17d26a6"
+                      (web3-utils/solidity-sha3 web3 "0x7d10b16dd1f9e0df45976d402879fb496c114936" 6 "abc")))
+
                (done))))))

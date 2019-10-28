@@ -91,7 +91,9 @@ For example to use the Web3JS implementation:
 
 #### <a name="http-provider">`http-provider`
 
-Similar to [websocket-provider](#websocket-provider), but creates a Web3 instance over HTTP.
+Similar to [websocket-provider](#websocket-provider), but creates a Web3 instance from a URL address.
+
+*NOTE* some functions, notably subscriptions (see e.g. [subscribe-events](#subscribe-events)), will work differently with than `http-provider`, which is why it's generally recommended to use the [websocket](#websocket-provider) connections for your subscriptions.
 
 #### <a name="extend">`extend`
 
@@ -203,7 +205,7 @@ Returns a JS/Promise which evaluates to the receipt of that transaction.
 
 #### <a name= "accounts">`accounts`
 
-Returns the availiable ethereum accounts.
+Returns the availiable ethereum accounts in the wallet on the node it is connected to.
 
 ```
 (accounts web3)
@@ -418,23 +420,97 @@ A [subscribe-logs](#subscribe-logs) equivalent of [get-past-events](#get-past-ev
 
 ### <a name="utils">`cljs-web3.utils`
 
-
+This namespaces provides various utility functions.
 
 #### <a name="sha3">`sha3`
+
+Returns a sha3 of the input.
+
 #### <a name="solidity-sha3">`solidity-sha3`
+
+Implementation of Solidity sha3 function. Takes a web3 provider and a variable number of arguments, returns a hash value (a string).
+
+```
+(solidity-sha3 web3 "0x7d10b16dd1f9e0df45976d402879fb496c114936" 6 "abc")
+```
+
 #### <a name="from-ascii">`from-ascii`
+
+`(from-ascii web3 args)`
+
 #### <a name="to-ascii">`to-ascii`
+
+`(to-ascii web3 arg)`
+
 #### <a name="number-to-hex">`number-to-hex`
+
+`(number-to-hex web3 number)`
+
 #### <a name="from-wei">`from-wei`
+
+`(from-wei web3 number <unit>)`
+
 #### <a name="to-wei">`to-wei`
+
+`(to-wei web3 number <unit>)`
+
 #### <a name="address?">`address?`
 
+`(address? web3 address)`
+
 ### <a name="evm">`cljs-web3.evm`
+
+*NOTE* The functions in this namespaces are not a part of the API unless you [extend](#extend) the `evm` module with these RPC calls.
+They will only to work with a testrpc such as [ganache](https://www.trufflesuite.com/ganache)
+
 #### <a name="increase-time">`increase-time`
+
+Increases the blockchain time by the specified numebr of seconds.
+
+`(increase-time web3 seconds)`
+
 #### <a name="mine-block">`mine-block`
 
+Instantly mines a block.
+
+`(mine-block web3)`
+
 ### <a name="helpers">`cljs-web3.helpers`
+
+Functions in this namespace are not part of the API, rather help in turning the JS objects returned by the API funcions to the corresponding Clojure data structures.
+As such they are independent of the currently used implementation and do not take the web3 provider as their first argument.
+
 #### <a name="js->cljkk">`js->cljkk`
+
+From JavaScript Object to Clojure map with kebab-cased keywords, e.g. :
+
+```clojure
+#js {:fromBlock 0, :toBlock "latest"}
+;; =>
+{:from-block 0 :to-block "latest"}
+```
 #### <a name="cljkk->js">`cljkk->js`
+
+From Clojure with kebab-cased keywords to JavaScript e.g.
+
+```clojure
+{:from-block 0 :to-block "latest"}
+;; =>
+#js {:fromBlock 0, :toBlock "latest"}
+```
+
 #### <a name="event-interface">`event-interface`
+
+Given a contract instance returned by the [contract-at](#contract-at) function and a `:CamelCase` key of the event, returns the [abi](#abi) interface of that event, which can be used e.g. with [subscribe-logs](#subscribe-logs).
+
+```clojure
+(event-interface my-contract :SetCounterEvent)
+```
+
 #### <a name="return-values->clj">`return-values->clj`
+
+Given a `returnValues` field (part of the data return by subscriptions, such as [subscribe-events](#subscribe-events)) and an [event-interface](#event-interface) returns a edn (aka Clojure) representation of this events return values.
+
+```
+(return-values->clj return-values event-interface)
+```
