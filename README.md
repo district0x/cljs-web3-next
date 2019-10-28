@@ -234,7 +234,7 @@ Returns a JS/Promise which evaluates to the representation of the last mined blo
 
 #### <a name= "encode-abi">`encode-abi`
 
-This function returns a raw transaction.
+This function returns the ABI bytecode of a transaction.
 
 It takes as arguments:
 - the [provider](#websocket-provider) map
@@ -242,7 +242,7 @@ It takes as arguments:
 - the kebab-cased keyword with the name of the smart contracts function
 - a vector with the arguments of the function
 
-Returns a string.
+Returns bytecode as a string.
 
 ```
 (encode-abi web3 my-contract :set-counter [3])
@@ -296,10 +296,78 @@ Returns a JS/Promise which evaluates to the tx-hash once the transaction is mine
 
 #### <a name= "subscribe-events">`subscribe-events`
 
+Creates a subscription listening to a specific contracts event.
+
+It takes as arguments:
+- the [provider](#websocket-provider) map
+- smart contract instance, as returned by the [contract-at](#contract-at) function
+- the camel-cased keyword with the name of the smart contracts event to listen to
+- map of options:
+  - `:from-block` : the block number (greater than or equal to) from which to get events on.
+- a nodejs-style callback function (`error` is a first parameters and `response` the second), executed each time the event is seen (optional)
+
+Returns a `EventEmitter` object which can be subsequently used with [on](#on) to react to an even finer-grained control.
+
+```
+(web3-eth/subscribe-events web3
+                           my-contract
+                           :SetCounterEvent
+                           {:from-block block-number}
+                           (fn [error event]
+                             (prn "new event" event})))
+```
+
+#### <a name= "subscribe-logs">`subscribe-logs`
+
+This function lets you create subscriptions listening to specific logs of things happening on the blockchain, filtered by a given list of topics.
+
+It takes as arguments:
+- the [provider](#websocket-provider) map
+- map of options:
+  - `:from-block` : the block number (greater than or equal to) from which to get events on.
+  - `:address` : a string or a vector of strings with addresses to listen to
+  - `:topics` : An vector of values which must each appear in the log entries. Order needs to match the order in the `:address` vector.
+- a nodejs-style callback function (`error` is a first parameters and `response` the second), executed each time the log is seen (optional)
+
+```clojure
+(web3-eth/subscribe-logs web3
+                         {:address [address]
+                          :topics [event-signature]
+                          :from-block block-number}
+                         (fn [_ event] ))
+```
+
+Similar to the [subscribe-events](#subscribe-events) function, it returns an `EventEmitter` which can be augmented using [on](#on).
+
+#### <a name= "decode-log">`decode-log`
+
+Use this function to decodes an ABI encoded log data and indexed topic data, such as returned by the [subscribe-logs](#subscribe-logs) subscription.
+
+Arguments:
+- the [provider](#websocket-provider) map
+`abi` : a map of interface inputs array
+`data` : the abi bytecode of the data field in the log (a string)
+`topics` : a vector of the topics of the log (see [subscribe-logs](#subscribe-logs))
 
 #### <a name= "on">`on`
-#### <a name= "subscribe-logs">`subscribe-logs`
-#### <a name= "decode-log">`decode-log`
+
+This function can be used with the `EventEmitter` returned by the [subscribe-events](#subscribe-events) and [subscribe-logs](#subscribe-logs).
+It will add callbacks executed on specific events:
+- `:connected`: fires the callback when the subscription is created, returns the id of that subscription as the first argument of the callback
+- `:data` : fired on each incoming log with the log object as argument. If the subscription happens ot be listening to a smart event contract the event passed as th ecallback argument is the same as for the [subscribe-events](#subscribe-events).
+- `:changed` : fires when the log is removed from the blockchain
+- `:error` : fires when an error in the subscription occurs.
+
+```clojure
+(-> event-emitter
+    (#(web3-eth/on web3 % :connected (fn [sub-id]
+                                       (prn "subscribed to SetCounterEvents. Subscription id :" sub-id))))
+    (#(web3-eth/on web3 % :data (fn [event]
+                                  (prn "new SetCounterEvents :" event))))
+    (#(web3-eth/on web3 % :error (fn [error]
+                                   (prn "Error :" error)))))
+```
+
 #### <a name= "unsubscribe">`unsubscribe`
 #### <a name= "clear-subscriptions">`clear-subscriptions`
 #### <a name= "get-past-events">`get-past-events`

@@ -70,12 +70,12 @@
     (js-invoke (apply js-invoke (aget contract-instance "methods") (web3-helpers/camel-case (name method)) (clj->js args)) "send" (clj->js opts)))
   (-subscribe-events [_ contract-instance event opts & [callback]]
     (apply js-invoke (aget contract-instance "events") (web3-helpers/camel-case (name event)) (remove nil? [(web3-helpers/cljkk->js opts) callback])))
-  (-subscribe-logs [_ provider contract-instance opts & [callback]]
+  (-subscribe-logs [_ provider opts & [callback]]
     (js-invoke (aget provider "eth") "subscribe" "logs" (web3-helpers/cljkk->js opts) callback))
   (-decode-log [_ provider abi data topics]
     (js-invoke (aget provider "eth" "abi") "decodeLog" (clj->js abi) data (clj->js topics)))
-  (-on [_ event-emitter evt callback]
-    (js-invoke event-emitter "on" (name evt) callback))
+  (-on [_ event-emitter event callback]
+    (js-invoke event-emitter "on" (name event) callback))
   (-unsubscribe [_ subscription & [callback]]
     (js-invoke subscription "unsubscribe" callback))
   (-clear-subscriptions [_ provider]

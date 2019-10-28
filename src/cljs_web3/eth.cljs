@@ -31,8 +31,8 @@
 (defn subscribe-events [{:keys [:instance]} contract-instance event opts & [callback]]
   (api/-subscribe-events instance contract-instance event opts callback))
 
-(defn subscribe-logs [{:keys [:instance :provider]} contract-instance opts & [callback]]
-  (api/-subscribe-logs instance provider contract-instance opts callback))
+(defn subscribe-logs [{:keys [:instance :provider]} opts & [callback]]
+  (api/-subscribe-logs instance provider opts callback))
 
 (defn decode-log [{:keys [:instance :provider]} abi data topics]
   (api/-decode-log instance provider abi data topics))
@@ -46,5 +46,5 @@
 (defn get-past-events [{:keys [:instance]} contract-instance event opts & [callback]]
   (api/-get-past-events instance contract-instance event opts callback))
 
-(defn on [{:keys [:instance]} event-emitter evt callback]
-  (api/-on instance event-emitter evt callback))
+(defn on [{:keys [:instance]} event-emitter event callback]
+  (api/-on instance event-emitter event callback))
