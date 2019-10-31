@@ -13,7 +13,7 @@
             [cljs.core.async :refer [<!] :as async]
             [tests.smart-contracts-test :refer [smart-contracts]]
             [district.shared.async-helpers :as async-helpers]
-            [web3.impl.web3js :as web3js]))
+            [cljs-web3.impl.web3js :as web3js]))
 
 (async-helpers/extend-promises-as-channels!)
 
