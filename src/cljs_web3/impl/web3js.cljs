@@ -1,4 +1,4 @@
-(ns web3.impl.web3js
+(ns cljs-web3.impl.web3js
   (:require [cljs-web3.api :as api :refer [Web3Api]]
             [cljs-web3.helpers :as web3-helpers]
             [cljs-web3.macros :refer [defrecord+]]
