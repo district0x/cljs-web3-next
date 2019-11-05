@@ -6,10 +6,10 @@
 (defn solidity-sha3 [provider arg & args]
   (apply js-invoke (aget provider "utils") "soliditySha3" arg args))
 
-(defn from-ascii [provider args]
+(defn from-ascii [provider arg]
   (js-invoke (aget provider "utils") "fromAscii" arg))
 
-(defn to-ascii [provider args]
+(defn to-ascii [provider arg]
   (js-invoke (aget provider "utils") "toAscii" arg))
 
 (defn number-to-hex [provider number]
