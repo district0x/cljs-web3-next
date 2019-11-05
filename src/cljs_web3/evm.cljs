@@ -1,8 +1,7 @@
-(ns cljs-web3.evm
-  (:require [cljs-web3.api :as api]))
+(ns cljs-web3.evm)
 
-(defn increase-time [{:keys [:instance :provider]} seconds]
- (api/-increase-time instance provider seconds))
+(defn increase-time [{:keys [:provider]} seconds]
+  (js-invoke (aget provider "evm") "increaseTime" seconds))
 
-(defn mine-block [{:keys [:instance :provider]}]
- (api/-mine-block instance provider))
+(defn mine-block [{:keys [:provider]}]
+  (js-invoke (aget provider "evm") "mineBlock"))

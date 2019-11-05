@@ -1,53 +1,53 @@
 (ns cljs-web3.eth
-  (:require [cljs-web3.api :as api]))
+  (:require [cljs-web3.helpers :as web3-helpers]))
 
-(defn is-listening? [{:keys [:instance :provider]} & [callback]]
-  (api/-is-listening? instance provider callback))
+(defn is-listening? [{:keys [:provider]} & [callback]]
+  (apply js-invoke (aget provider "eth" "net") "isListening" (remove nil? [callback])))
 
-(defn contract-at [{:keys [:instance :provider]} abi address]
- (api/-contract-at instance provider abi address))
+(defn contract-at [{:keys [:provider]} abi address]
+  (new (aget provider "eth" "Contract") abi address))
 
-(defn get-transaction-receipt [{:keys [:instance :provider]} tx-hash & [callback]]
- (api/-get-transaction-receipt instance provider tx-hash callback))
+(defn get-transaction-receipt [{:keys [:provider]} tx-hash & [callback]]
+  (apply js-invoke (aget provider "eth") "getTransactionReceipt" (remove nil? [tx-hash callback])))
 
-(defn accounts [{:keys [:instance :provider]}]
-  (api/-accounts instance provider))
+(defn accounts [{:keys [:provider]}]
+  (js-invoke (aget provider "eth") "getAccounts"))
 
-(defn get-block-number [{:keys [:instance :provider]} & [callback]]
-  (api/-get-block-number instance provider callback))
+(defn get-block-number [{:keys [:provider]} & [callback]]
+  (apply js-invoke (aget provider "eth") "getBlockNumber" (remove nil? [callback])))
 
-(defn get-block [{:keys [:instance :provider]} block-hash-or-number return-transactions? & [callback]]
-  (api/-get-block instance provider block-hash-or-number return-transactions? callback))
+(defn get-block [{:keys [:provider]} block-hash-or-number return-transactions? & [callback]]
+  (apply js-invoke (aget provider "eth") "getBlock" (remove nil? [block-hash-or-number return-transactions? callback])))
 
-(defn encode-abi [{:keys [:instance]} contract-instance method args]
-  (api/-encode-abi instance contract-instance method args))
+(defn encode-abi [{:keys []} contract-instance method args]
+  (js-invoke (apply js-invoke (aget contract-instance "methods") (web3-helpers/camel-case (name method)) (clj->js args)) "encodeABI"))
 
-(defn contract-call [{:keys [:instance]} contract-instance method args opts]
-  (api/-contract-call instance contract-instance method args opts))
+(defn contract-call [{:keys []} contract-instance method args opts]
+  (js-invoke (apply js-invoke (aget contract-instance "methods") (web3-helpers/camel-case (name method)) (clj->js args)) "call" (clj->js opts)))
 
-(defn contract-send [{:keys [:instance]} contract-instance method args opts]
-  (api/-contract-send instance contract-instance method args opts))
+(defn contract-send [{:keys []} contract-instance method args opts]
+  (js-invoke (apply js-invoke (aget contract-instance "methods") (web3-helpers/camel-case (name method)) (clj->js args)) "send" (clj->js opts)))
 
-(defn subscribe-events [{:keys [:instance]} contract-instance event opts & [callback]]
-  (api/-subscribe-events instance contract-instance event opts callback))
+(defn subscribe-events [{:keys []} contract-instance event opts & [callback]]
+  (apply js-invoke (aget contract-instance "events") (web3-helpers/camel-case (name event)) (remove nil? [(web3-helpers/cljkk->js opts) callback])))
 
-(defn subscribe-logs [{:keys [:instance :provider]} opts & [callback]]
-  (api/-subscribe-logs instance provider opts callback))
+(defn subscribe-logs [{:keys [:provider]} opts & [callback]]
+  (js-invoke (aget provider "eth") "subscribe" "logs" (web3-helpers/cljkk->js opts) callback))
 
-(defn decode-log [{:keys [:instance :provider]} abi data topics]
-  (api/-decode-log instance provider abi data topics))
+(defn decode-log [{:keys [:provider]} abi data topics]
+  (js-invoke (aget provider "eth" "abi") "decodeLog" (clj->js abi) data (clj->js topics)))
 
-(defn unsubscribe [{:keys [:instance]} subscription & [callback]]
-  (api/-unsubscribe instance subscription callback))
+(defn unsubscribe [{:keys []} subscription & [callback]]
+  (js-invoke subscription "unsubscribe" callback))
 
-(defn clear-subscriptions [{:keys [:instance :provider]}]
-  (api/-clear-subscriptions instance provider))
+(defn clear-subscriptions [{:keys [:provider]}]
+  (js-invoke (aget provider "eth") "clearSubscriptions"))
 
-(defn get-past-events [{:keys [:instance]} contract-instance event opts & [callback]]
-  (api/-get-past-events instance contract-instance event opts callback))
+(defn get-past-events [{:keys []} contract-instance event opts & [callback]]
+  (js-invoke contract-instance "getPastEvents" (web3-helpers/camel-case (name event)) (web3-helpers/cljkk->js opts) callback))
 
-(defn get-past-logs [{:keys [:instance :provider]} opts & [callback]]
-  (api/-get-past-logs instance provider opts callback))
+(defn get-past-logs [{:keys [:provider]} opts & [callback]]
+  (js-invoke (aget provider "eth") "getPastLogs" (web3-helpers/cljkk->js opts) callback))
 
-(defn on [{:keys [:instance]} event-emitter event callback]
-  (api/-on instance event-emitter event callback))
+(defn on [{:keys []} event-emitter event callback]
+  (js-invoke event-emitter "on" (name event) callback))

@@ -2,7 +2,6 @@
   (:require-macros [cljs.test :refer [deftest testing is async]]
                    [cljs.core.async.macros :refer [go]])
   (:require [cljs.test :as t]
-            [cljs-web3.macros]
             [tests.macros :refer [slurpit]]
             [cljs-web3.core :as web3-core]
             [cljs-web3.eth :as web3-eth]
@@ -10,18 +9,16 @@
             [cljs-web3.helpers :as web3-helpers]
             [cljs.nodejs :as nodejs]
             [clojure.string :as string]
-            [cljs.core.async :refer [<!] :as async]
+            [cljs.core.async :refer [<!]]
             [tests.smart-contracts-test :refer [smart-contracts]]
-            [district.shared.async-helpers :as async-helpers]
-            [cljs-web3.impl.web3js :as web3js]))
+            [district.shared.async-helpers :as async-helpers]))
 
 (async-helpers/extend-promises-as-channels!)
 
 (def abi (aget (js/JSON.parse (slurpit "./resources/public/contracts/build/MyContract.json")) "abi"))
 
 (deftest test-web3 []
-  (let [inst (web3js/new)
-        web3 (web3-core/websocket-provider inst "ws://127.0.0.1:8545")]
+  (let [web3 (web3-core/websocket-provider "ws://127.0.0.1:8545")]
     (async done
            (go
              (let [connected? (<! (web3-eth/is-listening? web3))
