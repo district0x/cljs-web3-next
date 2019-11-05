@@ -13,7 +13,7 @@
   (js-invoke (aget provider "utils") "toAscii" arg))
 
 (defn number-to-hex [provider number]
-  (js-invoke (aget provider "utils") "numberToHex" arg))
+  (js-invoke (aget provider "utils") "numberToHex" number))
 
 (defn from-wei [provider number & [unit]]
   (js-invoke (aget provider "utils") "fromWei" (str number) (name unit)))
