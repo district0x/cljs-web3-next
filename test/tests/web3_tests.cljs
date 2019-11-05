@@ -28,17 +28,16 @@
                    address (-> smart-contracts :my-contract :address)
                    my-contract (web3-eth/contract-at web3 abi address)
                    event-interface (web3-helpers/event-interface my-contract :SetCounterEvent)
-                   event-emitter (-> (web3-eth/subscribe-events web3
-                                                                my-contract
+                   event-emitter (-> (web3-eth/subscribe-events my-contract
                                                                 :SetCounterEvent
                                                                 {:from-block (inc block-number)}
                                                                 (fn [_ event]
                                                                   (let [return-values (aget event "returnValues")
                                                                         evt-values (web3-helpers/return-values->clj return-values event-interface)]
                                                                     (is (= "3" (:new-value evt-values))))))
-                                     (#(web3-eth/on web3 % :connected (fn [sub-id]
+                                     (#(web3-eth/on % :connected (fn [sub-id]
                                                                         (is (int? sub-id)))))
-                                     (#(web3-eth/on web3 % :data (fn [event]
+                                     (#(web3-eth/on % :data (fn [event]
                                                                    (is (= "3" (:new-value (web3-helpers/return-values->clj (aget event "returnValues") event-interface))))))))
                    event-signature (:signature event-interface)
                    event-log-emitter (web3-eth/subscribe-logs web3
@@ -49,20 +48,17 @@
                                                                 (let [return-values (web3-eth/decode-log web3 (:inputs event-interface) (aget event "data") [event-signature])
                                                                       evt-values (web3-helpers/return-values->clj return-values event-interface)]
                                                                   (is (= "3" (:new-value evt-values))))))
-                   tx (<! (web3-eth/contract-send web3
-                                                  my-contract
+                   tx (<! (web3-eth/contract-send my-contract
                                                   :set-counter
                                                   [3]
                                                   {:from (first accounts)
                                                    :gas 4000000}))
-                   seven (<! (web3-eth/contract-call web3
-                                                     my-contract
+                   seven (<! (web3-eth/contract-call my-contract
                                                      :my-plus
                                                      [3 4]
                                                      {:from (first accounts)}))
                    tx-receipt (<! (web3-eth/get-transaction-receipt web3 (aget tx "transactionHash")))
-                   past-events (<! (web3-eth/get-past-events web3
-                                                             my-contract
+                   past-events (<! (web3-eth/get-past-events my-contract
                                                              :SetCounterEvent
                                                              {:from-block 0
                                                               :to-block "latest"}))
@@ -73,7 +69,7 @@
                                                           :to-block "latest"}))]
 
                (is (= "7" seven))
-               (is (= "0x8bb5d9c30000000000000000000000000000000000000000000000000000000000000003" (web3-eth/encode-abi web3 my-contract :set-counter [3])))
+               (is (= "0x8bb5d9c30000000000000000000000000000000000000000000000000000000000000003" (web3-eth/encode-abi my-contract :set-counter [3])))
                (is (= address (string/lower-case (aget my-contract "_address"))))
                (is (aget tx-receipt "status"))
                (is connected?)
@@ -83,8 +79,8 @@
                (is (= "3" (:new-value (web3-helpers/return-values->clj (aget past-events "0" "returnValues") event-interface))))
                (is (= 1 (count past-logs)))
 
-               (web3-eth/unsubscribe web3 event-emitter)
-               (web3-eth/unsubscribe web3 event-log-emitter)
+               (web3-eth/unsubscribe event-emitter)
+               (web3-eth/unsubscribe event-log-emitter)
                (web3-core/disconnect web3)
 
                (is (= "0xf652222313e28459528d920b65115c16c04f3efc82aaedc97be59f3f377c0d3f"
