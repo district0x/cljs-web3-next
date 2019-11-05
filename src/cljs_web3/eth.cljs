@@ -19,16 +19,16 @@
 (defn get-block [{:keys [:provider]} block-hash-or-number return-transactions? & [callback]]
   (apply js-invoke (aget provider "eth") "getBlock" (remove nil? [block-hash-or-number return-transactions? callback])))
 
-(defn encode-abi [{:keys []} contract-instance method args]
+(defn encode-abi [contract-instance method args]
   (js-invoke (apply js-invoke (aget contract-instance "methods") (web3-helpers/camel-case (name method)) (clj->js args)) "encodeABI"))
 
-(defn contract-call [{:keys []} contract-instance method args opts]
+(defn contract-call [contract-instance method args opts]
   (js-invoke (apply js-invoke (aget contract-instance "methods") (web3-helpers/camel-case (name method)) (clj->js args)) "call" (clj->js opts)))
 
-(defn contract-send [{:keys []} contract-instance method args opts]
+(defn contract-send [contract-instance method args opts]
   (js-invoke (apply js-invoke (aget contract-instance "methods") (web3-helpers/camel-case (name method)) (clj->js args)) "send" (clj->js opts)))
 
-(defn subscribe-events [{:keys []} contract-instance event opts & [callback]]
+(defn subscribe-events [contract-instance event opts & [callback]]
   (apply js-invoke (aget contract-instance "events") (web3-helpers/camel-case (name event)) (remove nil? [(web3-helpers/cljkk->js opts) callback])))
 
 (defn subscribe-logs [{:keys [:provider]} opts & [callback]]
@@ -37,17 +37,17 @@
 (defn decode-log [{:keys [:provider]} abi data topics]
   (js-invoke (aget provider "eth" "abi") "decodeLog" (clj->js abi) data (clj->js topics)))
 
-(defn unsubscribe [{:keys []} subscription & [callback]]
+(defn unsubscribe [subscription & [callback]]
   (js-invoke subscription "unsubscribe" callback))
 
 (defn clear-subscriptions [{:keys [:provider]}]
   (js-invoke (aget provider "eth") "clearSubscriptions"))
 
-(defn get-past-events [{:keys []} contract-instance event opts & [callback]]
+(defn get-past-events [contract-instance event opts & [callback]]
   (js-invoke contract-instance "getPastEvents" (web3-helpers/camel-case (name event)) (web3-helpers/cljkk->js opts) callback))
 
 (defn get-past-logs [{:keys [:provider]} opts & [callback]]
   (js-invoke (aget provider "eth") "getPastLogs" (web3-helpers/cljkk->js opts) callback))
 
-(defn on [{:keys []} event-emitter event callback]
+(defn on [event-emitter event callback]
   (js-invoke event-emitter "on" (name event) callback))
