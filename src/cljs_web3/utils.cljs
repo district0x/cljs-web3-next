@@ -1,6 +1,6 @@
 (ns cljs-web3.utils)
 
-(defn sha3 [provider args]
+(defn sha3 [provider arg]
   (js-invoke (aget provider "utils") "sha3" arg))
 
 (defn solidity-sha3 [provider arg & args]
