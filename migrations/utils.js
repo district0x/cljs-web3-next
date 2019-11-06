@@ -40,12 +40,13 @@ const utils = {
     contract.bytecode = bytecode;
   },
 
-  smartContractsTemplate: (map, env) => {
-    return `(ns tests.smart-contracts-${env})
-  (def smart-contracts
-    ${map})
+  smartContractsTemplate (map, env) {
+    return `(ns memefactory.shared.smart-contracts-${env})
+
+(def smart-contracts
+  ${map})
 `;
-  },
+  }
 
 };
 
