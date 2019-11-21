@@ -1,6 +1,6 @@
-(ns cljs-web3.core
+(ns cljs-web3-next.core
   (:require [cljs.nodejs :as nodejs]
-            [cljs-web3.helpers :as web3-helpers]))
+            [cljs-web3-next.helpers :as web3-helpers]))
 
 (def Web3 (nodejs/require "web3"))
 
