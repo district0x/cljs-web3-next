@@ -13,6 +13,9 @@
 (defn accounts [provider]
   (js-invoke (aget provider "eth") "getAccounts"))
 
+(defn get-balance [provider address]
+  (js-invoke (aget provider "eth") "getBalance" address))
+
 (defn get-block-number [provider & [callback]]
   (apply js-invoke (aget provider "eth") "getBlockNumber" (remove nil? [callback])))
 
