@@ -1,4 +1,4 @@
-(ns cljs-web3.utils)
+(ns cljs-web3-next.utils)
 
 (defn sha3 [provider arg]
   (js-invoke (aget provider "utils") "sha3" arg))

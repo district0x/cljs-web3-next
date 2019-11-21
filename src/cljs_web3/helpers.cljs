@@ -1,4 +1,4 @@
-(ns cljs-web3.helpers
+(ns cljs-web3-next.helpers
   (:require [bignumber.core :as bn]
             [camel-snake-kebab.core :as camel-snake]
             [camel-snake-kebab.extras :as camel-snake-extras]

@@ -1,5 +1,5 @@
-(ns cljs-web3.eth
-  (:require [cljs-web3.helpers :as web3-helpers]))
+(ns cljs-web3-next.eth
+  (:require [cljs-web3-next.helpers :as web3-helpers]))
 
 (defn is-listening? [provider & [callback]]
   (apply js-invoke (aget provider "eth" "net") "isListening" (remove nil? [callback])))
@@ -12,6 +12,9 @@
 
 (defn accounts [provider]
   (js-invoke (aget provider "eth") "getAccounts"))
+
+(defn get-balance [provider address]
+  (js-invoke (aget provider "eth") "getBalance" address))
 
 (defn get-block-number [provider & [callback]]
   (apply js-invoke (aget provider "eth") "getBlockNumber" (remove nil? [callback])))

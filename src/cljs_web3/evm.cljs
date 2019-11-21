@@ -1,4 +1,4 @@
-(ns cljs-web3.evm)
+(ns cljs-web3-next.evm)
 
 (defn increase-time [provider seconds]
   (js-invoke (aget provider "evm") "increaseTime" seconds))
