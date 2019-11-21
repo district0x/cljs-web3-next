@@ -5,3 +5,9 @@
 
 (defn mine-block [provider]
   (js-invoke (aget provider "evm") "mineBlock"))
+
+(defn snapshot [provider]
+  (js-invoke (aget provider "evm") "snapshot"))
+
+(defn revert [provider]
+  (js-invoke (aget provider "evm") "revert"))
