@@ -3,9 +3,9 @@
 [![CircleCI](https://circleci.com/gh/district0x/cljs-web3-next/tree/master.svg?style=svg)](https://circleci.com/gh/district0x/cljs-web3-next/tree/master)
 
 This ClojureScript library provides a API for interacting with [Ethereum](https://www.ethereum.org/) nodes.
-It uses a [bridge pattern](https://en.wikipedia.org/wiki/Bridge_pattern) to decouple its API from the subsequent implementations, allowing the latter to vary at runtime.
+<!-- It uses a [bridge pattern](https://en.wikipedia.org/wiki/Bridge_pattern) to decouple its API from the subsequent implementations, allowing the latter to vary at runtime. -->
 
-In practice what this means is that future versions of the library will maintain the same function signatures and behaviour, it also means that anyone can provide a suitable implementation in this library, or opt-in to use the API in own.
+<!-- In practice what this means is that future versions of the library will maintain the same function signatures and behaviour, it also means that anyone can provide a suitable implementation in this library, or opt-in to use the API in own. -->
 
 ## Installation
 Latest released version of this library: <br>
@@ -13,7 +13,6 @@ Latest released version of this library: <br>
 
 ## API Overview
 
-- [cljs-web3.api](#api)
 - [cljs-web3.core](#core)
   - [http-provider](#http-provider)
   - [websocket-provider](#websocket-provider)
@@ -60,9 +59,6 @@ Latest released version of this library: <br>
   - [event-interface](#event-interface)
   - [return-values->clj](#return-values->clj)
 
-### <a name="api"></a>`cljs-web3.api`
-
-This namespace contains the API of this library which the participating implementations need to implement.
 
 ### <a name="core"></a>`cljs-web3.core`
 
@@ -74,19 +70,18 @@ This function is the gateway to using the library.
 Most other functions will take the map it returns as their first argument, unless specified otherwise.
 
 It creates a Web3 instance over a websocket connection.
-Takes an instance of the [Web3Api](#api) protocol and the url as parameters.
-Returns a map (the provider map) with two keys:
-- `:instance` : the instance of the implementation of the API, same as you have passed it
-- `:provider` : the websocket
+Takes an the url and a map of options as parameters.
+Returns a the websocket (the provider)
 
-For example to use the Web3JS implementation:
+Example:
 
 ```clojure
 (ns my-district
   (:require [cljs-web3.core :as web3-core]
             [web3.impl.web3js :as web3js]))
 
-(def web3 (web3-core/websocket-provider (web3js/new) "ws://127.0.0.1:8545"))
+(def web3 (web3-core/websocket-provider "ws://127.0.0.1:8545" {:client-config {:max-received-frame-size 100000000
+                                                                               :max-received-message-size 100000000}}))
 ```
 
 #### <a name="http-provider">`http-provider`
