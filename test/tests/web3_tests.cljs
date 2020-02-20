@@ -95,4 +95,7 @@
                (is (= "0x789357bc7419b62048fc1339ce448db0836603d3c0738082337b68e2b17d26a6"
                       (web3-utils/solidity-sha3 web3 "0x7d10b16dd1f9e0df45976d402879fb496c114936" 6 "abc")))
 
+               (is (= "0xc1912fEE45d61C87Cc5EA59DaE31190FFFFf232d"
+                      (web3-utils/address->checksum web3 "0xc1912fee45d61c87cc5ea59dae31190fffff2323")))
+
                (done))))))

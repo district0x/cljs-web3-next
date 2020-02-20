@@ -30,3 +30,6 @@
 
 (defn address? [provider address]
   (js-invoke (aget provider "utils") "isAddress" address))
+
+(defn address->checksum [provider address]
+  (js-invoke (aget provider "utils") "toChecksumAddress" address))
