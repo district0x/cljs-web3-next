@@ -10,8 +10,8 @@
 
   :doo {:paths {:karma "./node_modules/karma/bin/karma"}}
 
-  :npm {:dependencies [;; before its in cljsjs
-                       [web3 "1.2.0"]]
+  :npm {:dependencies [[web3 "1.2.0"]
+                       [binaryage/oops "0.7.0"]]
         :devDependencies [[karma "1.7.1"]
                           [karma-chrome-launcher "2.2.0"]
                           [karma-cli "1.0.1"]
