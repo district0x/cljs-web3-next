@@ -1,5 +1,6 @@
 (ns cljs-web3-next.eth
-  (:require [cljs-web3-next.helpers :as web3-helpers]))
+  (:require [cljs-web3-next.helpers :as web3-helpers]
+            [oops.core :refer [ocall oget]]))
 
 (defn is-listening? [provider & [callback]]
   (apply js-invoke (aget provider "eth" "net") "isListening" (remove nil? [callback])))
