@@ -1,5 +1,6 @@
 (ns cljs-web3-next.core
   (:require [cljs.nodejs :as nodejs]
+            [oops.core :refer [ocall oget]]
             [cljs-web3-next.helpers :as web3-helpers]))
 
 (def Web3 (nodejs/require "web3"))
@@ -11,29 +12,29 @@
   (new Web3 (new (aget Web3 "providers" "WebsocketProvider") uri (web3-helpers/cljkk->js opts))))
 
 (defn connection-url [provider]
-  (aget provider "currentProvider" "connection" "_url"))
+  (oget provider "currentProvider" "connection" "_url"))
 
 (defn current-provider [provider]
-  (aget provider "currentProvider"))
+  (oget provider "currentProvider"))
 
 (defn set-provider [provider new-provider]
-  (js-invoke provider "setProvider" new-provider))
+  (ocall provider "setProvider" new-provider))
 
 (defn extend [provider property methods]
-  (js-invoke provider "extend" (web3-helpers/cljkk->js {:property property
+  (ocall provider "extend" (web3-helpers/cljkk->js {:property property
                                                         :methods methods})))
 
 (defn connected? [provider]
-  (aget provider "currentProvider" "connected"))
+  (oget provider "currentProvider" "connected"))
 
 (defn disconnect [provider]
-  (js-invoke (aget provider "currentProvider") "disconnect"))
+  (ocall (oget provider "currentProvider") "disconnect"))
 
 (defn on-connect [provider & [callback]]
-  (apply js-invoke (aget provider "currentProvider") (remove nil? ["on" "connect" callback])))
+  (ocall (oget provider "currentProvider") (remove nil? ["on" "connect" callback])))
 
 (defn on-disconnect [provider & [callback]]
-  (apply js-invoke (aget provider "currentProvider") (remove nil? ["on" "end" callback])))
+  (ocall (oget provider "currentProvider") (remove nil? ["on" "end" callback])))
 
 (defn on-error [provider & [callback]]
-  (apply js-invoke (aget provider "currentProvider") (remove nil? ["on" "error" callback])))
+  (ocall (oget provider "currentProvider") (remove nil? ["on" "error" callback])))
