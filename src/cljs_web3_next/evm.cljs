@@ -1,13 +1,15 @@
-(ns cljs-web3-next.evm)
+(ns cljs-web3-next.evm
+  (:require [cljs-web3-next.helpers :as web3-helpers]
+            [oops.core :refer [ocall oget]]))
 
 (defn increase-time [provider seconds]
-  (js-invoke (aget provider "evm") "increaseTime" seconds))
+  (ocall (oget provider "evm") "increaseTime" seconds))
 
 (defn mine-block [provider]
-  (js-invoke (aget provider "evm") "mineBlock"))
+  (ocall (oget provider "evm") "mineBlock"))
 
 (defn snapshot [provider]
-  (js-invoke (aget provider "evm") "snapshot"))
+  (ocall (oget provider "evm") "snapshot"))
 
 (defn revert [provider]
-  (js-invoke (aget provider "evm") "revert"))
+  (ocall (oget provider "evm") "revert"))
