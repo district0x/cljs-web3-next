@@ -1,6 +1,5 @@
 (ns cljs-web3-next.evm
-  (:require [cljs-web3-next.helpers :as web3-helpers]
-            [oops.core :refer [ocall oget]]))
+  (:require [oops.core :refer [ocall oget]]))
 
 (defn increase-time [provider seconds]
   (ocall (oget provider "evm") "increaseTime" seconds))
