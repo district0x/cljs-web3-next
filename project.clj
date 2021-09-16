@@ -6,12 +6,12 @@
 
   :dependencies [[camel-snake-kebab "0.4.0"]
                  [district0x/bignumber "1.0.3"]
+                 [binaryage/oops "0.7.0"]
                  [org.clojure/clojurescript "1.10.520"]]
 
   :doo {:paths {:karma "./node_modules/karma/bin/karma"}}
 
-  :npm {:dependencies [[web3 "1.2.0"]
-                       [binaryage/oops "0.7.0"]]
+  :npm {:dependencies [[web3 "1.2.0"]]
         :devDependencies [[karma "1.7.1"]
                           [karma-chrome-launcher "2.2.0"]
                           [karma-cli "1.0.1"]
