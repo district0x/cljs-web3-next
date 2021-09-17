@@ -1,6 +1,6 @@
 (ns cljs-web3-next.core
   (:require [cljs.nodejs :as nodejs]
-            [oops.core :refer [ocall ocall+ oget]]
+            [oops.core :refer [ocall ocall+ oget gget]]
             [cljs-web3-next.helpers :as web3-helpers]))
 
 (def Web3 (nodejs/require "web3"))
@@ -38,3 +38,21 @@
 
 (defn on-error [provider & [callback]]
   (ocall+ (oget provider "currentProvider") (remove nil? ["on" "error" callback])))
+
+;; compatible API
+
+(defn default-web3 []
+  (new Web3 (gget "web3" "currentProvider" )))
+
+
+(def version-ethereum
+  "Returns a hexadecimal string representing the Ethereum protocol version.
+  Parameters:
+  web3        - web3 instance
+  callback-fn - callback with two parameters, error and result
+  Example:
+  user> `(version-ethereum web3-instance
+           (fn [err res] (when-not err (println res))))`
+  nil
+  user> 0x3f"
+  (oget (default-web3) "version"))
