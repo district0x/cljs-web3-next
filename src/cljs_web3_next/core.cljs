@@ -6,20 +6,15 @@
 
 (def Web3 (nodejs/require "web3"))
 
-(defn http-provider [uri]
-  (new Web3 (new (oget Web3 "providers" "HttpProvider") uri)))
+(defn http-provider
+  ([uri] (http-provider uri Web3))
+  ([uri web3] (new web3 (new (oget web3 "providers" "HttpProvider") uri))))
 
 (defn websocket-provider [uri opts]
   (new Web3 (new (oget Web3 "providers" "WebsocketProvider") uri (web3-helpers/cljkk->js opts))))
 
 (defn connection-url [provider]
   (oget provider "currentProvider" "connection" "_url"))
-
-(defn current-provider [provider]
-  (oget provider "currentProvider"))
-
-(defn set-provider [provider new-provider]
-  (ocall+ provider "setProvider" new-provider))
 
 (defn extend [provider property methods]
   (ocall+ provider "extend" (web3-helpers/cljkk->js {:property property
@@ -349,10 +344,6 @@
   (gget ".?web3" ".?currentProvider"))
 
 ;;; Providers
-
-(defn http-provider [Web3 uri]
-  (let [constructor (aget Web3 "providers" "HttpProvider")]
-    (constructor. uri)))
 
 (defn ipc-provider [Web3 uri]
   (let [constructor (oget Web3 "providers" "IpcProvider")]
