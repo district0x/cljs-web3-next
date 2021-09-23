@@ -57,6 +57,8 @@
 (defn sha3
   "Returns a string representing the Keccak-256 SHA3 of the given data.
 
+  Breaking change in 1.0: options are not accepted
+
   Parameters:
   String - The string to hash using the Keccak-256 SHA3 algorithm
   Map    - (optional) Set encoding to hex if the string to hash is encoded
@@ -74,10 +76,9 @@
   NOTE: This differs from the documented result of the Web3 JavaScript API,
   which equals
   \"0x85dd39c91a64167ba20732b228251e67caed1462d4bcf036af88dc6856d0fdcc\""
-  ([string] (sha3 string nil))
-  ([string options] (utils/sha3 (default-web3) string options))
-  ([Web3 string options]
-   (ocall+ Web3 "utils" "sha3" string options)))
+  ([string] (utils/sha3 (default-web3) string))
+  ([Web3 string]
+   (utils/sha3 Web3 string)))
 
 (defn to-hex
   "Returns hexadecimal string representation of any value
