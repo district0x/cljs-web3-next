@@ -508,4 +508,27 @@ Given a `returnValues` field (part of the data return by subscriptions, such as 
 
 ```
 (return-values->clj return-values event-interface)
+
+## Running tests
+
+```bash
+lein npm install
+```
+
+#### spin up a testnet instance in a separate shell
+```bash
+npx truffle develop
+```
+
+#### migrate contracts
+```bash
+npx truffle migrate --network ganache
+```
+
+#### compile cljs and run tests
+```bash
+lein cljsbuild once nodejs-tests
+```
+
+
 ```
