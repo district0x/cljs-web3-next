@@ -508,6 +508,7 @@ Given a `returnValues` field (part of the data return by subscriptions, such as 
 
 ```
 (return-values->clj return-values event-interface)
+```
 
 ## Running tests
 
@@ -527,8 +528,7 @@ npx truffle migrate --network ganache
 
 #### compile cljs and run tests
 ```bash
-lein cljsbuild once nodejs-tests
+lein doo node "nodejs-tests" once
 ```
 
 
-```
