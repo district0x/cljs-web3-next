@@ -1,4 +1,4 @@
-(defproject cljs-web3-next "dev3"
+(defproject cljs-web3-next "2.0.0"
   :description "ClojureScript Web3 library with swappable backends."
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
@@ -10,7 +10,8 @@
 
   :doo {:paths {:karma "./node_modules/karma/bin/karma"}}
 
-  :npm {:dependencies [[web3 "1.2.0"]]
+  :npm {:dependencies [[web3 "1.2.0"]
+                       [jsedn "0.4.1"]]
         :devDependencies [[karma "1.7.1"]
                           [karma-chrome-launcher "2.2.0"]
                           [karma-cli "1.0.1"]
