@@ -100,8 +100,8 @@
   user> `(web3-eth/contract-call ContractInstance :multiply 5)`
   25"
   [contract-instance method & args]
-  (let [method-name (camel-case (name method))
-        method-fn (aget contract-instance method-name)]
+  (let [method-name (web3-helpers/camel-case (name method))
+        method-fn (oget contract-instance method-name)]
     (if method-fn
-      (js-apply method-fn "getData" args)
+      (oget method-fn "getData" args)
       (throw (str "Method: " method-name " was not found in object.")))))
