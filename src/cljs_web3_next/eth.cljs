@@ -55,3 +55,53 @@
 
 (defn on [event-emitter event callback]
   (ocall event-emitter "on" (name event) callback))
+
+(defn default-account
+  "Gets the default address that is used for the following methods (optionally
+  you can overwrite it by specifying the :from key in their options map):
+
+  - `send-transaction!`
+  - `call!`
+
+  Parameters:
+  web3 - web3 instance
+
+  Returns the default address HEX string.
+
+  Example:
+  user> `(default-account web3-instance)`
+  \"0x85d85715218895ae964a750d9a92f13a8951de3d\""
+  [provider]
+  (first (accounts provider)))
+
+;; recheck currying here
+(defn stop-watching!
+  "Stops and uninstalls the filter.
+
+  Arguments:
+  filter - the filter to stop"
+  [filter & args]
+  (unsubscribe filter (first args)))
+
+
+(defn contract-get-data
+  "Gets binary data of a contract method call.
+
+  Use the kebab-cases version of the original method.
+  E.g., function fooBar() can be addressed with :foo-bar.
+
+  Parameters:
+  contract-instance - an instance of the contract (obtained via `contract` or
+                      `contract-at`)
+  method            - the kebab-cased version of the method
+  args              - arguments to the method
+
+  Example:
+  user> `(web3-eth/contract-call ContractInstance :multiply 5)`
+  25"
+  [contract-instance method & args]
+  (let [method-name (camel-case (name method))
+        method-fn (aget contract-instance method-name)]
+    (if method-fn
+      (js-apply method-fn "getData" args)
+      (throw (str "Method: " method-name " was not found in object.")))))
