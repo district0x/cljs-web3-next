@@ -1,6 +1,6 @@
 (ns cljs-web3-next.eth
   (:require [cljs-web3-next.helpers :as web3-helpers]
-            [oops.core :refer [ocall oget]]))
+            [oops.core :refer [ocall oget oset!]]))
 
 (defn is-listening? [provider & [callback]]
   (ocall provider "eth" "net" "isListening" (remove nil? [callback])))
@@ -84,7 +84,29 @@
   user> `(default-account web3-instance)`
   \"0x85d85715218895ae964a750d9a92f13a8951de3d\""
   [provider]
-  (first (accounts provider)))
+  (oget provider "eth" "defaultAccount"))
+
+(defn set-default-account!
+  "Sets the default address that is used for the following methods (optionally
+  you can overwrite it by specifying the :from key in their options map):
+
+  - `send-transaction!`
+  - `call!`
+
+  Parameters:
+  web3    - web3 instance
+  hex-str - Any 20 bytes address you own, or where you have the private key for
+
+
+  Returns a 20 bytes HEX string representing the currently set address.
+
+  Example:
+  user> (set-default-account! web3-instance
+                              \"0x85d85715218895ae964a750d9a92f13a8951de3d\")
+  \"0x85d85715218895ae964a750d9a92f13a8951de3d\""
+  [provider hex-str]
+  (oset! provider "eth" "defaultAccount" hex-str))
+
 
 ;; recheck currying here
 (defn stop-watching!
