@@ -56,6 +56,18 @@
 (defn on [event-emitter event callback]
   (ocall event-emitter "on" (name event) callback))
 
+(defn eth
+  "Gets eth object from web3-instance.
+
+  Parameter:
+  web3 - web3 instance"
+  [provider]
+  (oget provider "eth"))
+
+
+;; legacy
+
+
 (defn default-account
   "Gets the default address that is used for the following methods (optionally
   you can overwrite it by specifying the :from key in their options map):
@@ -105,3 +117,13 @@
     (if method-fn
       (oget method-fn "getData" args)
       (throw (str "Method: " method-name " was not found in object.")))))
+
+
+;; DEPRECATED
+(defn get-compile
+  "Gets compile object from web3-instance.
+
+  Parameter:
+  web3 - web3 instance"
+  [web3]
+  nil)
