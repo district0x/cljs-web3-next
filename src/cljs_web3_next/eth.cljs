@@ -107,6 +107,60 @@
   [provider hex-str]
   (oset! provider "eth" "defaultAccount" hex-str))
 
+(defn default-block
+  "This default block is used for the following methods (optionally you can
+  override it by passing the default-block parameter):
+
+  - `get-balance`
+  - `get-code`
+  - `get-transactionCount`
+  - `get-storageAt`
+  - `call`
+  - `contract-call`
+  - `estimate-gas`
+
+  Parameters:
+  web3 - web3 instance
+
+  Returns one of:
+  - a block number
+  - \"earliest\", the genisis block
+  - \"latest\", the latest block (current head of the blockchain)
+  - \"pending\", the currently mined block (including pending transactions)
+
+  Example:
+  user> `(default-block web3-instance)`
+  \"latest\""
+  [provider]
+  (oget provider "eth" "defaultBlock"))
+
+
+(defn set-default-block!
+  "Sets default block that is used for the following methods (optionally you can
+  override it by passing the default-block parameter):
+
+  - `get-balance`
+  - `get-code`
+  - `get-transactionCount`
+  - `get-storageAt`
+  - `call`
+  - `contract-call`
+  - `estimate-gas`
+
+  Parameters:
+  web3  - web3 instance
+  block - one of:
+            - a block number
+            - \"earliest\", the genisis block
+            - \"latest\", the latest block (current head of the blockchain)
+            - \"pending\", the currently mined block (including pending
+              transactions)
+
+  Example:
+  user> `(set-default-block! web3-instance \"earliest\")`
+  \"earliest\""
+  [provider block]
+  (oset! provider "eth" "defaultBlock" block))
 
 ;; recheck currying here
 (defn stop-watching!
