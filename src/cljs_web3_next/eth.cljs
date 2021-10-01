@@ -162,6 +162,27 @@
   [provider block]
   (oset! provider "eth" "defaultBlock" block))
 
+(defn syncing
+  "This property is read only and returns the either a sync object, when the
+  node is syncing or false.
+
+  Parameters:
+  web3        - web3 instance
+  callback-fn - callback with two parameters, error and result
+
+  Returns a sync object as follows, when the node is currently syncing or false:
+  - startingBlock: The block number where the sync started.
+  - currentBlock:  The block number where at which block the node currently
+                   synced to already.
+  - highestBlock:  The estimated block number to sync to.
+
+  Example:
+  user> `(syncing web3-instance (fn [err res] (when-not err (println res))))`
+  nil
+  user> `false`"
+  [provider]
+  (ocall provider "eth" "isSyncing"))
+
 ;; recheck currying here
 (defn stop-watching!
   "Stops and uninstalls the filter.
