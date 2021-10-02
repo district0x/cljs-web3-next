@@ -162,6 +162,7 @@
   [provider block]
   (oset! provider "eth" "defaultBlock" block))
 
+;;DEPRECATED partially
 (defn syncing
   "This property is read only and returns the either a sync object, when the
   node is syncing or false.
@@ -182,6 +183,23 @@
   user> `false`"
   [provider]
   (ocall provider "eth" "isSyncing"))
+
+(def syncing? syncing)
+
+(defn coinbase
+  "This property is read only and returns the coinbase address where the mining
+  rewards go to.
+
+  Parameters:
+  web3 - web3 instance
+
+  Returns a string representing the coinbase address of the client.
+
+  Example:
+  user> `(coinbase web3-instance)`
+  \"0x85d85715218895ae964a750d9a92f13a8951de3d\""
+  [provider]
+  (ocall provider "eth" "getCoinbase"))
 
 ;; recheck currying here
 (defn stop-watching!
