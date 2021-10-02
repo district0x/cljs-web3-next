@@ -1,6 +1,6 @@
 (ns cljs-web3-next.eth
   (:require [cljs-web3-next.helpers :as web3-helpers]
-            [oops.core :refer [ocall oget oset!]]))
+            [oops.core :refer [ocall oget oset! oapply+]]))
 
 (defn is-listening? [provider & [callback]]
   (ocall provider "eth" "net" "isListening" (remove nil? [callback])))
@@ -14,8 +14,9 @@
 (defn accounts [provider]
   (ocall provider "eth" "getAccounts"))
 
-(defn get-balance [provider address]
-  (ocall provider "eth" "getBalance" address))
+;; recheck conflicts with updated fn
+;; (defn get-balance [provider address]
+;;   (ocall provider "eth" "getBalance" address))
 
 (defn get-block-number [provider & [callback]]
   (ocall provider "eth" "getBlockNumber" (remove nil? [callback])))
@@ -200,6 +201,96 @@
   \"0x85d85715218895ae964a750d9a92f13a8951de3d\""
   [provider]
   (ocall provider "eth" "getCoinbase"))
+
+(defn mining?
+  "This property is read only and says whether the node is mining or not.
+
+  Parameters:
+  web3 - web3 instance
+
+  Returns a boolean: true if the client is mining, otherwise false.
+
+  Example:
+  `(mining? web3-instance (fn [err res] (when-not err (println res))))`
+  nil
+  user> `false`"
+  [provider]
+  (ocall provider "eth" "isMining"))
+
+
+(defn hashrate
+  "This property is read only and returns the number of hashes per second that
+  the node is mining with.
+
+  Parameters:
+  web3 - web3 instance
+
+  Returns a number representing the hashes per second.
+
+  user> `(hashrate web3-instance (fn [err res] (when-not err (println res))))`
+  nil
+  user> 0
+  "
+  [provider]
+  (ocall provider "eth" "getHashrate"))
+
+
+(defn gas-price
+  "This property is read only and returns the current gas price. The gas price
+  is determined by the x latest blocks median gas price.
+
+  Parameters:
+  web3        - web3 instance
+  callback-fn - callback with two parameters, error and result
+
+  Returns a BigNumber instance of the current gas price in wei.
+
+  Example:
+  user> `(gas-price web3-instance (fn [err res] (when-not err (println res))))`
+  nil
+  user> #object[e 90000000000]"
+  [provider]
+  (ocall provider "eth" "getGasPrice"))
+
+(defn block-number
+  "This property is read only and returns the current block number.
+
+  Parameters:
+  web3        - web3 instance
+  callback-fn - callback with two parameters, error and result
+
+  Returns the number of the most recent block.
+
+  Example:
+  `(block-number web3-instance
+                 (fn [err res] (when-not err (println res))))`
+  nil
+  user> `1783426`"
+  [provider]
+  (get-block-number provider))
+
+(defn get-balance
+  "Get the balance of an address at a given block.
+
+  Parameters:
+  web3          - web3 instance
+  address       - The address to get the balance of.
+  default-block - If you pass this parameter it will not use the default block
+                  set with set-default-block.
+  callback-fn   - callback with two parameters, error and result
+
+  Returns a BigNumber instance of the current balance for the given address in
+  wei.
+
+  Example:
+  user> `(get-balance web3-instance
+                      \"0x85d85715218895ae964a750d9a92f13a8951de3d\"
+                      \"latest\"
+                      (fn [err res] (when-not err (println res))))`
+  nil
+  user> #object[e 1729597111000000000]"
+  [provider & [address default-block :as args]]
+  (oapply+ provider "eth" "getBalance" args))
 
 ;; recheck currying here
 (defn stop-watching!
