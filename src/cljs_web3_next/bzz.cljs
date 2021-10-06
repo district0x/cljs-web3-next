@@ -8,35 +8,38 @@
 (defn get-bzz [provider]
   (oget provider "bzz"))
 
+;;TODO research Swarm docs for shimming
 (defn block-network-read [provider & args]
-  (oapply+ (get-bzz provider) "blockNetworkRead" args))
+ nil
+  #_(oapply+ (get-bzz provider) "blockNetworkRead" args))
 
 (defn download [web3 & args]
-  (js-apply (get-bzz web3) "download" args))
-
-
-(def hive (u/prop-or-clb-fn "bzz" "hive"))
-(def info (u/prop-or-clb-fn "bzz" "info"))
-
-(defn modify [web3 & args]
-  (js-apply (get-bzz web3) "modify" args))
-
-(defn retrieve [web3 & args]
-  (js-apply (get-bzz web3) "retrieve" args))
-
-(defn store [web3 & args]
-  (oapply+ (get-bzz web3) "store" args))
+  (oapply+ (get-bzz web3) "download" args))
 
 (defn upload [web3 & args]
+  (oapply+ (get-bzz web3) "pick" args))
+
+(defn put [web3 & args]
   (oapply+ (get-bzz web3) "upload" args))
 
 ;; DEPRECATED
 (defn swap-enabled? [web3 & args]
-  (js-apply (get-bzz web3) "swapEnabled" args))
+  false)
 
 ;; DEPRECATED
 (defn sync-enabled? [web3 & args]
   false)
 
 (def get download)
-(def put upload)
+(def retrieve download)
+(def modify put)
+(def store put)
+
+
+
+;; TODO verify both fns
+(defn hive [web3]
+  (oget (get-bzz web3) "bzz" "hive"))
+
+(defn info [web3]
+  (oget (get-bzz web3) "bzz" "info"))
