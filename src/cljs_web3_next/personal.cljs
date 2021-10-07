@@ -27,7 +27,7 @@
   user> `(list-accounts web3-instance)`
   [\"0x5e97870f263700f46aa00d967821199b9bc5a120\",
    \"0x3d80b31a78c30fc628f20b2c89d7ddbf6e53cedc\"]"
-  (prop-or-clb-fn "personal" "listAccounts"))
+  (prop-or-clb-fn "personal" "getAccounts"))
 
 
 (defn lock-account
@@ -55,7 +55,7 @@
   Promise returns Boolean: true if the account was created, otherwise
   false."
   [web3 & args]
-  (js-apply (get-prs web3) "newAccount" args))
+  (oapply+ (get-prs web3) "newAccount" args))
 
 
 (defn unlock-account
@@ -77,7 +77,7 @@
                                    indefinitely
                                    callback)`"
   [web3 & args]
-  (js-apply (get-prs web3) "unlockAccount" args))
+  (oapply+ (get-prs web3) "unlockAccount" args))
 
 
 (defn ec-recover
@@ -95,7 +95,7 @@
 
   Returns the Ethereum address used to sign this data."
   [web3 & args]
-  (js-apply (get-prs web3) "ecRecover" args))
+  (oapply+ (get-prs web3) "ecRecover" args))
 
 
 (defn import-raw-key
@@ -110,7 +110,7 @@
 
   Returns the address of the new account."
   [web3 & args]
-  (js-apply (get-prs web3) "importRawKey" args))
+  (oapply+ (get-prs web3) "importRawKey" args))
 
 
 (defn send-transaction
@@ -134,7 +134,7 @@
           \"password\"
          callback)`"
   [web3 & args]
-  (js-apply (get-prs web3) "sendTransaction" args))
+  (oapply+ (get-prs web3) "sendTransaction" args))
 
 
 (defn sign
@@ -155,4 +155,4 @@
   Returns:
   Promise returns String - The signature."
   [web3 & args]
-  (js-apply (get-prs web3) "sign" args))
+  (oapply+ (get-prs web3) "sign" args))
