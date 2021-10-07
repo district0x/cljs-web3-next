@@ -52,22 +52,24 @@
   "Seems deprecated since no JavaScript documentation available at
   http://web3js.readthedocs.io/en/1.0/web3-shh.html"
   [web3 & args]
-  (oapply+ (get-shh web3) "newIdentity" args))
+  (oapply+ (get-shh web3) "addSymKey" args))
 
 (defn has-identity?
   "Seems deprecated since no JavaScript documentation available at
   http://web3js.readthedocs.io/en/1.0/web3-shh.html"
   [web3 & args]
-  (oapply+ (get-shh web3) "hasIdentity" args))
+  (oapply+ (get-shh web3) "hasSymKey" args))
 
+;;DEPRECATED
 (defn new-group
   "Seems deprecated since no JavaScript documentation available at
   http://web3js.readthedocs.io/en/1.0/web3-shh.html"
   [web3 & args]
-  (oapply+ (get-shh web3) "newGroup" args))
+  nil)
 
+;;DEPRECATED
 (defn add-to-group
   "Seems deprecated since no JavaScript documentation available at
   http://web3js.readthedocs.io/en/1.0/web3-shh.html"
   [web3 & args]
-  (oapply+ (get-shh web3) "addToGroup" args))
+  nil)
