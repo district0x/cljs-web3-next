@@ -7,6 +7,7 @@
             [cljs-web3-next.eth :as web3-eth]
             [cljs-web3-next.utils :as web3-utils]
             [cljs-web3-next.helpers :as web3-helpers]
+            [cljs-web3-next.personal :as web3-personal]
             [cljs.nodejs :as nodejs]
             [clojure.string :as string]
             [oops.core :refer [ocall oget oset! oapply+]]
@@ -111,17 +112,18 @@
                (is (string? (<! (web3-core/version-api web3))))
                (is (= (<! (web3-core/sha3 "1")) "0xc89efdaa54c0f20c7adf612882df0950f5a951637e0307cdcb4c672f298b8bc6"))
                (is (= (<! (web3-core/to-hex web3 "A")) "0x41"))
+               (is (= (<! (web3-core/to-ascii "0x41")) "A"))
+               (is (= (<! (web3-core/from-ascii "A")) "0x41"))
+               (is (= (<! (web3-core/to-decimal "0xFF")) 255))
+               (is (= (<! (web3-core/from-decimal 255)) "0xff"))
+               (is (= (<! (web3-core/from-wei 1000000000000000000 :ether)) "1"))
+               (is (= (<! (web3-core/to-wei 1 :ether)) "1000000000000000000"))
+               (is (<! (web3-personal/unlock-account web3 (web3-eth/default-account web3) "m" 999999)))
 
                (done)
                )))
   #_ (is (string? (web3/version-ethereum w3)))              ; Not working with testrpc
   ;; (is (seq (web3-eth/accounts w3)))
-  ;; (is (= (web3/to-ascii "0x41") "A"))
-  ;; (is (= (web3/from-ascii "A") "0x41"))
-  ;; (is (= (web3/to-decimal "0xFF") 255))
-  ;; (is (= (web3/from-decimal 255) "0xff"))
-  ;; (is (= (web3/from-wei 1000000000000000000 :ether) "1"))
-  ;; (is (= (web3/to-wei 1 :ether) "1000000000000000000"))
   ;; (is (= (web3/pad-left "1" 5 "A") "AAAA1"))
   ;; (is (= (web3/pad-right "1" 5 "A") "1AAAA"))
   ;; (is (.eq (web3/to-big-number 1) 1))
