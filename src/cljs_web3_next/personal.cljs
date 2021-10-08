@@ -156,3 +156,23 @@
   Promise returns String - The signature."
   [web3 & args]
   (oapply+ (get-prs web3) "sign" args))
+
+
+(defn extend
+  "Allows extending the web3 modules.
+
+  Parameters:
+  property - the name of the property to add to the module.
+             if no property is set it will be added to the module directly.
+  methods - array: The array of method descriptions:
+                   name - String: Name of the method to add.
+                   call - String: The RPC method name.
+                   params - Number: (optional) The number of parameters
+                   for that function. Default 0.
+                   inputFormatter - Array: (optional) Array of inputformatter functions.
+                   Each array item responds to a function parameter, so if you want some
+                   parameters not to be formatted, add a null instead.
+                   outputFormatter - ``Function: (optional) Can be used to format the
+                   output of the method."
+  [web3 & args]
+  (oapply+ (get-prs web3) "extend" args))
