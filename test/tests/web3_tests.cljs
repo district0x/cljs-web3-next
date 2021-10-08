@@ -9,13 +9,14 @@
             [cljs-web3-next.helpers :as web3-helpers]
             [cljs.nodejs :as nodejs]
             [clojure.string :as string]
+            [oops.core :refer [ocall oget oset! oapply+]]
             [cljs.core.async :refer [<!]]
             [tests.smart-contracts-test :refer [smart-contracts]]
             [district.shared.async-helpers :as async-helpers]))
 
 (async-helpers/extend-promises-as-channels!)
 
-(def abi (aget (js/JSON.parse (slurpit "./resources/public/contracts/build/MyContract.json")) "abi"))
+(def abi (oget (js/JSON.parse (slurpit "./resources/public/contracts/build/MyContract.json")) "abi"))
 
 (deftest test-web3 []
   (let [web3 (web3-core/websocket-provider "ws://127.0.0.1:8545")]
@@ -103,7 +104,8 @@
 (deftest legacy
   "0.* web3 backward compatibility test"
   []
-  (let [web3 (web3-core/websocket-provider "ws://127.0.0.1:8545")]
+  ;; test it out with http provider
+  (let [web3 (web3-core/http-provider "http://127.0.0.1:8545")]
     (async done
            (go (is (<! (web3-core/connected? web3)))
                (is (string? (<! (web3-core/version-api web3))))
