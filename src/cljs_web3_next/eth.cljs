@@ -1,6 +1,6 @@
 (ns cljs-web3-next.eth
   (:require [cljs-web3-next.helpers :as web3-helpers]
-            [oops.core :refer [ocall oget oset! oapply+]]))
+            [oops.core :refer [ocall oget oget+ oset! oapply+]]))
 
 (defn is-listening? [provider & [callback]]
   (ocall provider "eth" "net" "isListening" (remove nil? [callback])))
@@ -319,9 +319,9 @@
   25"
   [contract-instance method & args]
   (let [method-name (web3-helpers/camel-case (name method))
-        method-fn (oget contract-instance method-name)]
+        method-fn (oget+ contract-instance method-name)]
     (if method-fn
-      (oget method-fn "getData" args)
+      (ocall method-fn "getData" args)
       (throw (str "Method: " method-name " was not found in object.")))))
 
 
