@@ -109,15 +109,15 @@
   (let [web3 (web3-core/http-provider "http://127.0.0.1:8545")]
     (async done
            (go (is (<! (web3-core/connected? web3)))
-               (is (string? (<! (web3-core/version-api web3))))
-               (is (= (<! (web3-core/sha3 "1")) "0xc89efdaa54c0f20c7adf612882df0950f5a951637e0307cdcb4c672f298b8bc6"))
+               #_(is (string? (<! (web3-core/version-api web3))))
+               (is (= (<! (web3-core/sha3 web3 "1")) "0xc89efdaa54c0f20c7adf612882df0950f5a951637e0307cdcb4c672f298b8bc6"))
                (is (= (<! (web3-core/to-hex web3 "A")) "0x41"))
-               (is (= (<! (web3-core/to-ascii "0x41")) "A"))
-               (is (= (<! (web3-core/from-ascii "A")) "0x41"))
-               (is (= (<! (web3-core/to-decimal "0xFF")) 255))
-               (is (= (<! (web3-core/from-decimal 255)) "0xff"))
-               (is (= (<! (web3-core/from-wei 1000000000000000000 :ether)) "1"))
-               (is (= (<! (web3-core/to-wei 1 :ether)) "1000000000000000000"))
+               (is (= (<! (web3-core/to-ascii web3 "0x41")) "A"))
+               (is (= (<! (web3-core/from-ascii web3 "A")) "0x41"))
+               (is (= (<! (web3-core/to-decimal web3 "0xFF")) 255))
+               (is (= (<! (web3-core/from-decimal web3 255)) "0xff"))
+               (is (= (<! (web3-core/from-wei web3 1000000000000000000 :ether)) "1"))
+               (is (= (<! (web3-core/to-wei web3 1 :ether)) "1000000000000000000"))
                (is (<! (web3-personal/unlock-account web3 (web3-eth/default-account web3) "m" 999999)))
 
                (done)
