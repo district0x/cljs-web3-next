@@ -55,6 +55,18 @@
   user> 0x3f"
   (oget (default-web3) "version"))
 
+(def version-api
+  "Returns a hexadecimal string representing the Ethereum protocol version.
+  Parameters:
+  web3        - web3 instance
+  callback-fn - callback with two parameters, error and result
+  Example:
+  user> `(version-ethereum web3-instance
+           (fn [err res] (when-not err (println res))))`
+  nil
+  user> 0x3f"
+  (oget (default-web3) "version"))
+
 
 (defn sha3
   "Returns a string representing the Keccak-256 SHA3 of the given data.
