@@ -45,7 +45,7 @@
                         :source-paths ["src" "browser-test"]
                         :compiler {:output-to "tests-output/tests.js"
                                    :output-dir "tests-output"
-                                   :main "tests.runner"
+                                   :main "browser-test.runner"
                                    :optimizations :none}}
                        {:id "nodejs-tests"
                         :source-paths ["src" "test"]
