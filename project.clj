@@ -41,7 +41,13 @@
                   ["change" "version" "leiningen.release/bump-version" "release"]
                   ["deploy"]]
 
-  :cljsbuild {:builds [{:id "nodejs-tests"
+  :cljsbuild {:builds [{:id "tests"
+                        :source-paths ["src" "browser-test"]
+                        :compiler {:output-to "tests-output/tests.js"
+                                   :output-dir "tests-output"
+                                   :main "tests.runner"
+                                   :optimizations :none}}
+                       {:id "nodejs-tests"
                         :source-paths ["src" "test"]
                         :compiler {:output-to "tests-output/node/tests.js"
                                    :output-dir "tests-output/node"
