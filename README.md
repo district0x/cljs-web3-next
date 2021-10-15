@@ -526,9 +526,14 @@ npx truffle develop
 npx truffle migrate --network ganache
 ```
 
-#### compile cljs and run tests
+#### compile cljs and run nodejs tests
 ```bash
 lein doo node "nodejs-tests" once
+```
+
+#### compile cljs and run browser tests
+```bash
+lein doo node "tests" once
 ```
 
 
