@@ -3,7 +3,7 @@
 
   A fast key-value storage library that provides an ordered mapping from string
   keys to string values."
-  (:require [cljs-web3.utils :as u :refer [js-apply]]))
+  (:require [oops.core :refer [ocall oget oset! oapply+]]))
 
 
 (defn get-db
@@ -12,7 +12,7 @@
   Parameter:
   web3 - web3 instance"
   [web3]
-  (aget web3 "db"))
+  (oget web3 "db"))
 
 
 (defn put-string!
@@ -28,7 +28,7 @@
 
   Returns true if successful, otherwise false."
   [web3 & [db key value cb :as args]]
-  (js-apply (get-db web3) "putString" args))
+  (oapply+ (get-db web3) "putString" args))
 
 
 (defn get-string
@@ -41,7 +41,7 @@
 
   Returns the stored value string."
   [web3 & [db key :as args]]
-  (js-apply (get-db web3) "getString" args))
+  (oapply+ (get-db web3) "getString" args))
 
 
 (defn put-hex!
@@ -55,7 +55,7 @@
 
   Returns true if successful, otherwise false."
   [web3 & [db key value :as args]]
-  (js-apply (get-db web3) "putHex" args))
+  (oapply+ (get-db web3) "putHex" args))
 
 
 (defn get-hex
@@ -68,4 +68,4 @@
 
   Returns the stored HEX value."
   [web3 & [db key :as args]]
-  (js-apply (get-db web3) "getHex" args))
+  (oapply+ (get-db web3) "getHex" args))
