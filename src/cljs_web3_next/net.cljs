@@ -1,5 +1,5 @@
 (ns cljs-web3-next.net
-  (:require [cljs-web3.utils :as u]))
+  (:require [cljs-web3-next.utils :refer [prop-or-clb-fn]]))
 
 ;;TODO convert to multi-arity as nodejs env can't fallback on injected web3
 
@@ -18,7 +18,7 @@
   user> `(listening? (fn [err res] (when-not err (println res))))`
   nil
   user> true"
-  (u/prop-or-clb-fn "net" "isListening"))
+  (prop-or-clb-fn "net" "isListening"))
 
 
 (def peer-count
@@ -30,4 +30,4 @@
   user> `(peer-count (fn [err res] (when-not err (println res))))`
   nil
   user> 4"
-  (u/prop-or-clb-fn "net" "getPeerCount"))
+  (prop-or-clb-fn "net" "getPeerCount"))
