@@ -1,8 +1,7 @@
-(ns tests.all
+(ns browser-test.all
   (:require
     [cljs.test :refer [deftest is testing run-tests async use-fixtures]]
     [day8.re-frame.test :refer [run-test-async wait-for run-test-sync]]
-    [district.ui.smart-contracts.deploy-events :as deploy-events]
     [cljs-web3-next.core :as web3-core]
     [cljs.core.async :refer [<!]]
     [district.ui.smart-contracts.events :as events]
