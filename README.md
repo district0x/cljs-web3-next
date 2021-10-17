@@ -533,7 +533,7 @@ lein doo node "nodejs-tests" once
 
 #### compile cljs and run browser tests
 ```bash
-lein doo node "tests" once
+lein doo chrome "tests" once
 ```
 
 
