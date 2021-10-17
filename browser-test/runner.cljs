@@ -2,7 +2,7 @@
   (:require
     [cljs.spec.alpha :as s]
     [doo.runner :refer-macros [doo-tests]]
-    [tests.all]))
+    [browser-test.all]))
 
 (s/check-asserts true)
 
