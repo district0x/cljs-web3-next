@@ -31,10 +31,9 @@
   (js->cljkk signature))
 
 (defn event-interface [contract-instance event-key]
-  (reduce (fn [_ element]
-            (when (= (:name element) (-> event-key camel-case name))
-              (reduced element)))
-          (js->cljk (aget contract-instance "_jsonInterface") )))
+  (let [event-name (-> event-key camel-case name)]
+    (first (filter #(= (:name %) event-name)
+                   (js->cljk (aget contract-instance "_jsonInterface"))))))
 
 (defn return-values->clj [return-values {:keys [:inputs] :as event-interface}]
   (reduce (fn [res value]
