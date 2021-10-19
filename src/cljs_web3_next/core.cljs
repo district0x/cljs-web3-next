@@ -8,15 +8,10 @@
 
 (defn http-provider
   ([uri] (http-provider uri Web3))
-  ([uri web3] (new web3 (new (oget web3 "providers" "HttpProvider") uri))))
+  ([uri web3] (new web3 (new (aget web3 "providers" "HttpProvider") uri))))
 
 (defn websocket-provider [uri opts]
   (new Web3 (new (aget Web3 "providers" "WebsocketProvider") uri (web3-helpers/cljkk->js opts))))
-
-#_(defn websocket-provider
-  ([uri] (websocket-provider uri {}))
-  ([uri opts]
-   (new Web3 (new (aget Web3 "providers" "WebsocketProvider") uri (web3-helpers/cljkk->js opts)))))
 
 (defn connection-url [provider]
   (oget provider "currentProvider" "connection" "_url"))
