@@ -2,8 +2,11 @@
   (:require [cljs-web3-next.helpers :as web3-helpers]
             [oops.core :refer [ocall oget oget+ oset! oapply+]]))
 
-(defn is-listening? [provider & [callback]]
-  (ocall provider "eth" "net" "isListening" (remove nil? [callback])))
+#_(defn is-listening? [provider & [callback]]
+  (oapply+ provider "eth" "net" "isListening" (remove nil? [callback])))
+
+(defn is-listening? [{:keys [:provider]} & [callback]]
+  (apply js-invoke (aget provider "eth" "net") "isListening" (remove nil? [callback])))
 
 (defn contract-at [provider abi address]
   (new (oget provider "eth" "Contract") abi address))

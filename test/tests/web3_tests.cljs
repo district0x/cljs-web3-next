@@ -20,7 +20,7 @@
 (def abi (oget (js/JSON.parse (slurpit "./resources/public/contracts/build/MyContract.json")) "abi"))
 
 (deftest test-web3 []
-  (let [web3 (web3-core/websocket-provider "ws://127.0.0.1:8545")]
+  (let [web3 (web3-core/http-provider "http://127.0.0.1:9545")]
     #_(async done
            (done))
     (async done
@@ -108,7 +108,7 @@
   "0.* web3 backward compatibility test"
   []
   ;; test it out with http provider
-  (let [web3 (web3-core/http-provider "http://127.0.0.1:8545")]
+  (let [web3 (web3-core/http-provider "http://127.0.0.1:9545")]
     (async done
            (go (is (<! (web3-core/connected? web3)))
                #_(is (string? (<! (web3-core/version-api web3))))
