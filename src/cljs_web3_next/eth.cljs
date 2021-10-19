@@ -19,7 +19,7 @@
 ;;   (ocall provider "eth" "getBalance" address))
 
 (defn get-block-number [provider & [callback]]
-  (ocall provider "eth" "getBlockNumber" (remove nil? [callback])))
+  (oapply+ provider "eth.getBlockNumber" (remove nil? [callback])))
 
 (defn get-block [provider block-hash-or-number return-transactions? & [callback]]
   (ocall provider "eth" "getBlock" (remove nil? [block-hash-or-number return-transactions? callback])))
