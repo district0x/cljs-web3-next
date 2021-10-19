@@ -21,6 +21,8 @@
 
 (deftest test-web3 []
   (let [web3 (web3-core/websocket-provider "ws://127.0.0.1:8545")]
+    #_(async done
+           (done))
     (async done
            (go
              (let [connected? (<! (web3-eth/is-listening? web3))
@@ -102,7 +104,7 @@
 
                (done))))))
 
-(deftest legacy
+#_(deftest legacy
   "0.* web3 backward compatibility test"
   []
   ;; test it out with http provider
