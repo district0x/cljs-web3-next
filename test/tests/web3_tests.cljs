@@ -21,8 +21,6 @@
 
 (deftest test-web3 []
   (let [web3 (web3-core/http-provider "http://127.0.0.1:9545")]
-    #_(async done
-           (done))
     (async done
            (go
              (let [connected? (<! (web3-eth/is-listening? web3))
