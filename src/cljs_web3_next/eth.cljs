@@ -1,6 +1,6 @@
 (ns cljs-web3-next.eth
   (:require [cljs-web3-next.helpers :as web3-helpers]
-            [oops.core :refer [ocall oget oget+ oset! oapply+]]))
+            [oops.core :refer [ocall ocall+ oget oget+ oset! oapply+]]))
 
 (defn is-listening? [provider & [callback]]
   (oapply+ provider "eth.net.isListening" (remove nil? [callback])))
@@ -9,10 +9,10 @@
   (new (oget provider "eth" "Contract") abi address))
 
 (defn get-transaction-receipt [provider tx-hash & [callback]]
-  (ocall provider "eth" "getTransactionReceipt" (remove nil? [tx-hash callback])))
+  (oapply+ provider "eth.getTransactionReceipt" (remove nil? [tx-hash callback])))
 
 (defn accounts [provider]
-  (ocall provider "eth" "getAccounts"))
+  (js-invoke (oget provider "eth") "getAccounts"))
 
 ;; recheck conflicts with updated fn
 ;; (defn get-balance [provider address]
