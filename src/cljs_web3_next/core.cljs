@@ -6,12 +6,17 @@
 
 (def Web3 (nodejs/require "web3"))
 
+;; reconsider http-provider args with <1.5.2 web3
 (defn http-provider
   ([uri] (http-provider uri Web3))
   ([uri web3] (new web3 (new (aget web3 "providers" "HttpProvider") uri))))
 
 (defn websocket-provider [uri opts]
   (new Web3 (new (aget Web3 "providers" "WebsocketProvider") uri (web3-helpers/cljkk->js opts))))
+
+(defn ws-provider
+  ([uri] (ws-provider uri {}))
+  ([uri opts] (websocket-provider uri opts)))
 
 (defn connection-url [provider]
   (oget provider "currentProvider" "connection" "_url"))
