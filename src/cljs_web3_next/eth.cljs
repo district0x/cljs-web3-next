@@ -6,7 +6,7 @@
   (oapply+ provider "eth.net.isListening" (remove nil? [callback])))
 
 (defn contract-at [provider abi address]
-  (new (oget provider "eth" "Contract") abi address))
+  (new (aget provider "eth" "Contract") abi address))
 
 (defn get-transaction-receipt [provider tx-hash & [callback]]
   (oapply+ provider "eth.getTransactionReceipt" (remove nil? [tx-hash callback])))
@@ -22,7 +22,7 @@
   (oapply+ provider "eth.getBlockNumber" (remove nil? [callback])))
 
 (defn get-block [provider block-hash-or-number return-transactions? & [callback]]
-  (ocall provider "eth" "getBlock" (remove nil? [block-hash-or-number return-transactions? callback])))
+  (oapply+ provider "eth.getBlock" (remove nil? [block-hash-or-number return-transactions? callback])))
 
 (defn encode-abi [contract-instance method args]
   (ocall contract-instance "methods" (web3-helpers/camel-case (name method)) (clj->js args) "encodeABI"))
@@ -34,13 +34,22 @@
   (ocall contract-instance "methods" (web3-helpers/camel-case (name method)) (clj->js args) "send" (clj->js opts)))
 
 (defn subscribe-events [contract-instance event opts & [callback]]
-  (ocall contract-instance "events" (web3-helpers/camel-case (name event)) (remove nil? [(web3-helpers/cljkk->js opts) callback])))
+  (ocall+ (oget contract-instance "events") (web3-helpers/camel-case (name event)) (remove nil? [(web3-helpers/cljkk->js opts) callback])))
 
 (defn subscribe-logs [provider opts & [callback]]
-  (ocall provider "eth" "subscribe" "logs" (web3-helpers/cljkk->js opts) callback))
+  (js-invoke (aget provider "eth") "subscribe" "logs" (web3-helpers/cljkk->js opts) callback))
 
 (defn decode-log [provider abi data topics]
-  (ocall provider "eth" "abi" "decodeLog" (clj->js abi) data (clj->js topics)))
+  (ocall+ provider "eth.abi.decodeLog" (clj->js abi) data (clj->js topics)))
+
+;; (defn subscribe-events [contract-instance event opts & [callback]]
+;;   (apply js-invoke (aget contract-instance "events") (web3-helpers/camel-case (name event)) (remove nil? [(web3-helpers/cljkk->js opts) callback])))
+
+;; (defn subscribe-logs [provider opts & [callback]]
+;;   (js-invoke (aget provider "eth") "subscribe" "logs" (web3-helpers/cljkk->js opts) callback))
+
+;; (defn decode-log [provider abi data topics]
+;;   (js-invoke (aget provider "eth" "abi") "decodeLog" (clj->js abi) data (clj->js topics)))
 
 (defn unsubscribe [subscription & [callback]]
   (ocall subscription "unsubscribe" callback))

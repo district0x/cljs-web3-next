@@ -20,7 +20,7 @@
 (def abi (oget (js/JSON.parse (slurpit "./resources/public/contracts/build/MyContract.json")) "abi"))
 
 (deftest test-web3 []
-  (let [web3 (web3-core/http-provider "http://127.0.0.1:9545")]
+  (let [web3 (web3-core/ws-provider "ws://127.0.0.1:9545")]
     (async done
            (go
              (let [connected? (<! (web3-eth/is-listening? web3))
@@ -42,23 +42,26 @@
                                      (#(web3-eth/on % :data (fn [event]
                                                                    (is (= "3" (:new-value (web3-helpers/return-values->clj (aget event "returnValues") event-interface))))))))
                    event-signature (:signature event-interface)
-                   event-log-emitter (web3-eth/subscribe-logs web3
-                                                              {:address [address]
-                                                               :topics [event-signature]
-                                                               :from-block (inc block-number)}
-                                                              (fn [_ event]
-                                                                (let [return-values (web3-eth/decode-log web3 (:inputs event-interface) (aget event "data") [event-signature])
-                                                                      evt-values (web3-helpers/return-values->clj return-values event-interface)]
-                                                                  (is (= "3" (:new-value evt-values))))))
+                   event-log-emitter (web3-eth/subscribe-logs
+                                      web3
+                                      {:address [address]
+                                       :topics [event-signature]
+                                       :from-block (inc block-number)}
+                                      (fn [_ event]
+                                        (let [return-values (web3-eth/decode-log web3 (:inputs event-interface) (oget event "data") [event-signature])
+                                              evt-values (web3-helpers/return-values->clj return-values event-interface)]
+                                          (is (= "3" (:new-value evt-values))))))
                    tx (<! (web3-eth/contract-send my-contract
                                                   :set-counter
                                                   [3]
                                                   {:from (first accounts)
                                                    :gas 4000000}))
+                   _ (println "c------------------------call1" )
                    seven (<! (web3-eth/contract-call my-contract
                                                      :my-plus
                                                      [3 4]
                                                      {:from (first accounts)}))
+                   _ (println "c------------------------call2" )
                    tx-receipt (<! (web3-eth/get-transaction-receipt web3 (aget tx "transactionHash")))
                    past-events (<! (web3-eth/get-past-events my-contract
                                                              :SetCounterEvent
