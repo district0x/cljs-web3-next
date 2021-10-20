@@ -28,10 +28,10 @@
   (ocall contract-instance "methods" (web3-helpers/camel-case (name method)) (clj->js args) "encodeABI"))
 
 (defn contract-call [contract-instance method args opts]
-  (ocall contract-instance "methods" (web3-helpers/camel-case (name method)) (clj->js args) "call" (clj->js opts)))
+  (ocall (oapply+ (oget contract-instance "methods") (web3-helpers/camel-case (name method)) (clj->js args)) "call" (clj->js opts)))
 
 (defn contract-send [contract-instance method args opts]
-  (ocall contract-instance "methods" (web3-helpers/camel-case (name method)) (clj->js args) "send" (clj->js opts)))
+  (ocall (oapply+ (oget contract-instance "methods") (web3-helpers/camel-case (name method)) (clj->js args)) "send" (clj->js opts)))
 
 (defn subscribe-events [contract-instance event opts & [callback]]
   (ocall+ (oget contract-instance "events") (web3-helpers/camel-case (name event)) (remove nil? [(web3-helpers/cljkk->js opts) callback])))
