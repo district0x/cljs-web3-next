@@ -72,6 +72,14 @@
   [provider]
   (oget provider "eth"))
 
+(defn iban
+  "Gets iban object from web3-instance.
+
+  Parameter:
+  web3 - web3 instance"
+  [provider]
+  (oget provider "Iban"))
+
 
 ;; legacy
 
@@ -333,6 +341,8 @@
 
 
 ;; DEPRECATED
+;; these functions existed in 0.* but
+;; were interfaced to empty implementations/broken/soft-deprecated
 (defn get-compile
   "Gets compile object from web3-instance.
 
@@ -340,3 +350,381 @@
   web3 - web3 instance"
   [web3]
   nil)
+
+(defn namereg
+  "Returns GlobalRegistrar object.
+
+  See https://github.com/ethereum/web3.js/blob/master/example/namereg.html
+  for an example in JavaScript."
+  [web3]
+  nil)
+
+(defn get-compilers
+  "Compiling features being deprecated https://github.com/ethereum/EIPs/issues/209"
+  [web3 & args]
+  nil)
+
+
+(defn compile-solidity
+  "Compiling features being deprecated https://github.com/ethereum/EIPs/issues/209"
+  [web3 & [source-string :as args]]
+  nil)
+
+
+(defn compile-lll
+  "Compiling features being deprecated https://github.com/ethereum/EIPs/issues/209"
+  [web3 & [source-string :as args]]
+  nil)
+
+
+(defn compile-serpent
+  "Compiling features being deprecated https://github.com/ethereum/EIPs/issues/209"
+  [web3 & [source-string :as args]]
+  nil)
+
+(defn register
+  "(Not Implemented yet) Registers the given address to be included in
+  `accounts`. This allows non-private-key owned accounts to be associated
+  as an owned account (e.g., contract wallets).
+
+  Parameters:
+  web3        - web3 instance
+  address     - string representing the address
+  callback-fn - callback with two parameters, error and result."
+  [web3 address]
+  nil)
+
+
+(defn unregister
+  "(Not Implemented yet) Unregisters a given address.
+
+  Parameters:
+  web3        - web3 instance
+  address     - string representing the address
+  callback-fn - callback with two parameters, error and result."
+  [web3 address]
+  nil)
+
+(defn get-storage-at
+  "Get the storage at a specific position of an address.
+
+  Parameters:
+  web3          - web3 instance
+  address       - The address to get the storage from.
+  position      - The index position of the storage.
+  default-block - If you pass this parameter it will not use the default block
+                  set with web3.eth.defaultBlock.
+  callback-fn   - callback with two parameters, error and result
+
+  Returns the value in storage at the given position.
+
+  Example:
+  user> `(get-storage-at web3-instance
+                         \"0x85d85715218895ae964a750d9a92f13a8951de3d\"
+                         0
+                         \"latest\"
+                         (fn [err res] (when-not err (println res))))`
+  nil
+  user> \"0x0000000000000000000000000000000000000000000000000000000000000000\" "
+  [web3 & [address position default-block :as args]]
+  (oapply+ (oget web3 "eth") "getStorageAt" args))
+
+(defn get-code
+  "Get the code at a specific address.
+
+  Parameters:
+  web3          - web3 instance
+  address       - The address to get the code from.
+  default-block - If you pass this parameter it will not use the default block set
+                  with `get-default-block!`.
+  callback-fn   - callback with two parameters, error and result
+
+  Returns the data at given address HEX string.
+
+  Example:
+  user> (get-code web3-instance
+                  \"0x85d85715218895ae964a750d9a92f13a8951de3d
+                  0
+                  \"latest\"
+                  (fn [err res] (when-not err (println res))))
+  nil
+  user> `0x`
+  "
+  [web3 & [address default-block :as args]]
+  (oapply+ (eth web3) "getCode" args))
+
+(defn get-block-transaction-count
+  "Returns the number of transaction in a given block.
+
+  Parameters
+  web3                 - web3 instance
+  block-hash-or-number - The block number or hash. Or the string \"earliest\",
+                         \"latest\" or \"pending\" as in the default block
+                         parameter.
+  callback-fn          - callback with two parameters, error and result
+
+  Example:
+  user> `(get-block-transaction-count
+           web3-instance
+           0
+           (fn [err res] (when-not err (println res))))`
+  nil
+  user> 0"
+  [web3 & [block-hash-or-number :as args]]
+  (oapply+ (eth web3) "getBlockTransactionCount" args))
+
+(defn get-uncle
+  "Returns a blocks uncle by a given uncle index position.
+  Parameters
+
+  Parameters:
+  web3                        - web3 instance
+  block-hash-or-number        - The block number or hash. Or the string
+                                \"earliest\", \"latest\" or \"pending\" as in
+                                the default block parameter
+  uncle-number                - The index position of the uncle
+  return-transaction-objects? - If true, the returned block will contain all
+                                transactions as objects, if false it will only
+                                contains the transaction hashes
+  default-block               - If you pass this parameter it will not use the
+                                default block set with (set-default-block)
+  callback-fn                 - callback with two parameters, error and result
+
+  Returns the returned uncle. For a return value see `(get-block)`.
+
+  Note: An uncle doesn't contain individual transactions."
+  [web3 & [block-hash-or-number uncle-number return-transaction-objects? :as args]]
+  (oapply+ (eth web3) "getUncle" args))
+
+(defn get-transaction
+ "Returns a transaction matching the given transaction hash.
+
+  Parameters:
+  web3             - web3 instance
+  transaction-hash - The transaction hash.
+  callback-fn      - callback with two parameters, error and result
+
+  Returns a transaction object its hash transaction-hash:
+
+  - hash: String, 32 Bytes - hash of the transaction.
+  - nonce: Number - the number of transactions made by the sender prior to this
+    one.
+  - block-hash: String, 32 Bytes - hash of the block where this transaction was
+                                   in. null when its pending.
+  - block-number: Number - block number where this transaction was in. null when
+                           its pending.
+  - transaction-index: Number - integer of the transactions index position in the
+                                block. null when its pending.
+  - from: String, 20 Bytes - address of the sender.
+  - to: String, 20 Bytes - address of the receiver. null when its a contract
+                           creation transaction.
+  - value: BigNumber - value transferred in Wei.
+  - gas-price: BigNumber - gas price provided by the sender in Wei.
+  - gas: Number - gas provided by the sender.
+  - input: String - the data sent along with the transaction.
+
+  Example:
+  user> `(get-transaction
+           web3-instance
+           \"0x...\"
+           (fn [err res] (when-not err (println res))))`
+  nil
+  user> {:r 0x...
+         :v 0x2a
+         :hash 0xf...
+         :transaction-index 3 ...
+         (...)
+         :to 0x...}"
+  [web3 & [transaction-hash :as args]]
+  (oapply+ (eth web3) "getTransaction" args))
+
+(defn get-transaction-from-block
+  "Returns a transaction based on a block hash or number and the transactions
+  index position.
+
+  Parameters:
+  web3                 - web3 instance
+  block-hash-or-number - A block number or hash. Or the string \"earliest\",
+                         \"latest\" or \"pending\" as in the default block
+                         parameter.
+  index                - The transactions index position.
+  callback-fn          - callback with two parameters, error and result
+  Number               - The transactions index position.
+
+  Returns a transaction object, see `(get-transaction)`
+
+  Example:
+  user> `(get-transaction-from-block
+           web3-instance
+           1799402
+           0
+           (fn [err res] (when-not err (println res))))`
+  nil
+  user> {:r 0x...
+         :v 0x2a
+         :hash 0xf...
+         :transaction-index 0 ...
+         (...)
+         :to 0x...}"
+  [web3 & [block-hash-or-number index :as args]]
+  (oapply+ (eth web3) "getTransactionFromBlock" args))
+
+(defn get-transaction-count
+  "Get the numbers of transactions sent from this address.
+
+  Parameters:
+  web3          - web3 instance
+  address       - The address to get the numbers of transactions from.
+  default-block - If you pass this parameter it will not use the default block
+                  set with set-default-block.
+  callback-fn   - callback with two parameters, error and result
+
+  Returns the number of transactions sent from the given address.
+
+  Example:
+  user> `(get-transaction-count web3-instance \"0x8\"
+           (fn [err res] (when-not err (println res))))`
+  nil
+  user> 16"
+  [web3 & [address default-block :as args]]
+  (oapply+ (eth web3) "getTransactionCount" args))
+
+(defn contract
+  "Important - callback has been deprecated
+  Creates an *abstract* contract object for a solidity contract, which can be used to
+  initiate contracts on an address.
+
+  Parameters:
+  web3          - web3 instance
+  abi           - ABI array with descriptions of functions and events of
+                  the contract
+
+  Returns a contract object."
+  [web3 & [abi :as args]]
+  (new (aget web3 "eth" "Contract") abi))
+
+(defn contract-new
+  "Deploy a contract asynchronous from a Solidity file.
+
+  Parameters:
+  web3             - web3 instance
+  abi              - ABI array with descriptions of functions and events of
+                     the contract
+  transaction-data - map that contains
+    - :gas - max gas to use
+    - :data the BIN of the contract
+    - :from account to use
+  callback-fn      - callback with two parameters, error and contract.
+                     From the contract the \"address\" property can be used to
+                     obtain the address. And the \"transactionHash\" to obtain
+                     the hash of the transaction, which created the contract.
+
+  Example:
+  `(contract-new web3-instance
+                 abi
+                 {:from \"0x..\"
+                  :data bin
+                  :gas  4000000}
+                 (fn [err contract]
+                   (if-not err
+                    (let [address (aget contract \"address\")
+                          tx-hash (aget contract \"transactionHash\")]
+                      ;; Two calls: transaction received
+                      ;; and contract deployed.
+                      ;; Check address on the second call
+                      (when (address? address)
+                        (do-something-with-contract contract)
+                        (do-something-with-address address)))
+                    (println \"error deploying contract\" err))))`
+   nil"
+  [web3 abi & [transaction-data callback-fn :as args]]
+  (oapply+ (contract web3 abi) "deploy" args))
+
+(defn send-transaction!
+  "Sends a transaction to the network.
+
+  Parameters:
+  web3               - web3 instance
+  transaction-object - The transaction object to send:
+
+    :from: String - The address for the sending account. Uses the
+                    `default-account` property, if not specified.
+
+    :to: String   - (optional) The destination address of the message, left
+                               undefined for a contract-creation
+                               transaction.
+
+    :value        - (optional) The value transferred for the transaction in
+                               Wei, also the endowment if it's a
+                               contract-creation transaction.
+
+    :gas:         - (optional, default: To-Be-Determined) The amount of gas
+                    to use for the transaction (unused gas is refunded).
+    :gas-price:   - (optional, default: To-Be-Determined) The price of gas
+                    for this transaction in wei, defaults to the mean network
+                    gas price.
+    :data:        - (optional) Either a byte string containing the associated
+                    data of the message, or in the case of a contract-creation
+                    transaction, the initialisation code.
+    :nonce:       - (optional) Integer of a nonce. This allows to overwrite your
+                               own pending transactions that use the same nonce.
+  callback-fn   - callback with two parameters, error and result, where result
+                  is the transaction hash
+
+  Returns the 32 Bytes transaction hash as HEX string.
+
+  If the transaction was a contract creation use `(get-transaction-receipt)` to
+  get the contract address, after the transaction was mined.
+
+  Example:
+  user> (send-transaction! web3-instance {:to \"0x..\"}
+          (fn [err res] (when-not err (println res))))
+  nil
+  user> 0x..."
+  [web3 & [transaction-object :as args]]
+  (oapply+ (eth web3) "sendTransaction" args))
+
+
+(defn send-raw-transaction!
+  "Sends an already signed transaction. For example can be signed using:
+  https://github.com/SilentCicero/ethereumjs-accounts
+
+  Parameters:
+  web3                    - web3 instance
+  signed-transaction-data - Signed transaction data in HEX format
+
+  callback-fn             - callback with two parameters, error and result
+
+  Returns the 32 Bytes transaction hash as HEX string.
+
+  If the transaction was a contract creation use `(get-transaction-receipt)`
+  to get the contract address, after the transaction was mined.
+
+  See https://github.com/ethereum/wiki/wiki/JavaScript-API#example-46 for a
+  JavaScript example."
+  [web3 & [signed-transaction-data :as args]]
+  (oapply+ (eth web3) "sendSignedTransaction" args))
+
+(def send-signed-transaction send-raw-transaction!)
+
+(defn send-iban-transaction!
+  "Sends IBAN transaction from user account to destination IBAN address.
+
+  note: IBAN protocol seems to be soft-deprecated
+
+  Parameters:
+  web3          - web3 instance
+  from          - address from which we want to send transaction
+  iban-address  - IBAN address to which we want to send transaction
+  value         - value that we want to send in IBAN transaction
+  callback-fn   - callback with two parameters, error and result
+
+  Note: uses smart contract to transfer money to IBAN account.
+
+  Example:
+  user> `(send-iban-transaction! '0xx'
+                                 'NL88YADYA02'
+                                  0x100
+                                  (fn [err res] (prn res)))`"
+  [web3 & [from iban-address value cb :as args]]
+  (oapply+ (eth web3) "sendTransaction" [from (ocall (iban web3) "toAddress" iban-address) value cb]))
