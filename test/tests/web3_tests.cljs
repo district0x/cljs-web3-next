@@ -75,7 +75,7 @@
 
                (is (= "7" seven))
                (is (= "0x8bb5d9c30000000000000000000000000000000000000000000000000000000000000003" (web3-eth/encode-abi my-contract :set-counter [3])))
-               (is (= address (string/lower-case (aget my-contract "_address"))))
+               (is (= (string/lower-case address) (string/lower-case (aget my-contract "_address"))))
                (is (aget tx-receipt "status"))
                (is connected?)
                (is (= 10 (count accounts)))
