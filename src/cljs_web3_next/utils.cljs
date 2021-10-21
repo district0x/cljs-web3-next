@@ -2,7 +2,7 @@
   (:require [camel-snake-kebab.core :as cs :include-macros true]
             [camel-snake-kebab.extras :refer [transform-keys]]
             [cljs.core.async :refer [>! chan]]
-            [oops.core :refer [ocall oget]]
+            [oops.core :refer [ocall oget oapply]]
             [clojure.string :as string])
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
@@ -10,7 +10,7 @@
   (ocall (oget provider "utils") "sha3" arg))
 
 (defn solidity-sha3 [provider arg & args]
-  (ocall (oget provider "utils") "soliditySha3" arg args))
+  (apply js-invoke (oget provider "utils") "soliditySha3" arg args))
 
 (defn from-ascii [provider arg]
   (ocall (oget provider "utils") "fromAscii" arg))

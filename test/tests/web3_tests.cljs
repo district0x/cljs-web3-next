@@ -56,12 +56,10 @@
                                                   [3]
                                                   {:from (first accounts)
                                                    :gas 4000000}))
-                   _ (println "c------------------------call1" )
                    seven (<! (web3-eth/contract-call my-contract
                                                      :my-plus
                                                      [3 4]
                                                      {:from (first accounts)}))
-                   _ (println "c------------------------call2" )
                    tx-receipt (<! (web3-eth/get-transaction-receipt web3 (aget tx "transactionHash")))
                    past-events (<! (web3-eth/get-past-events my-contract
                                                              :SetCounterEvent
