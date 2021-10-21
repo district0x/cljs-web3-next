@@ -1,6 +1,7 @@
 (ns cljs-web3-next.eth
+  (:refer-clojure :exclude [filter])
   (:require [cljs-web3-next.helpers :as web3-helpers]
-            [oops.core :refer [ocall ocall+ oget oget+ oset! oapply+]]))
+            [oops.core :refer [ocall ocall+ oget oget+ oset! oapply oapply+]]))
 
 (defn is-listening? [provider & [callback]]
   (oapply+ provider "eth.net.isListening" (remove nil? [callback])))
@@ -54,12 +55,6 @@
 
 (defn get-past-logs [provider opts & [callback]]
   (js-invoke (oget provider "eth") "getPastLogs" (web3-helpers/cljkk->js opts) callback))
-
-;; (defn get-past-events [contract-instance event opts & [callback]]
-;;   (js-invoke contract-instance "getPastEvents" (web3-helpers/camel-case (name event)) (web3-helpers/cljkk->js opts) callback))
-
-;; (defn get-past-logs [provider opts & [callback]]
-;;   (js-invoke (aget provider "eth") "getPastLogs" (web3-helpers/cljkk->js opts) callback))
 
 (defn on [event-emitter event callback]
   (ocall event-emitter "on" (name event) callback))
@@ -728,3 +723,169 @@
                                   (fn [err res] (prn res)))`"
   [web3 & [from iban-address value cb :as args]]
   (oapply+ (eth web3) "sendTransaction" [from (ocall (iban web3) "toAddress" iban-address) value cb]))
+
+
+(defn sign
+  "Signs data from a specific account. This account needs to be unlocked.
+
+  Parameters:
+  web3          - web3 instance
+  address       - The address to sign with
+  data-to-sign  - Data to sign
+  callback-fn   - callback with two parameters, error and result
+
+  Returns the signed data.
+
+  After the hex prefix, characters correspond to ECDSA values like this:
+
+  r = signature[0:64]
+  s = signature[64:128]
+  v = signature[128:130]
+
+  Note that if you are using ecrecover, v will be either \"00\" or \"01\". As a
+  result, in order to use this value, you will have to parse it to an integer
+  and then add 27. This will result in either a 27 or a 28.
+
+  Example:
+  user> `(sign web3-instance
+               \"0x135a7de83802408321b74c322f8558db1679ac20\"
+               \"0x9dd2c369a187b4e6b9c402f030e50743e619301ea62aa4c0737d4ef7e10a3d49\"
+               (fn [err res] (when-not err (println res))))`
+
+  user> 0x3..."
+  [web3 & [address data-to-sign :as args]]
+  (oapply (eth web3) "sign" args))
+
+
+(defn sign-transaction
+  "Sign a transaction. Method is not documented in the web3.js docs. Not sure if it is safe.
+
+  Parameters:
+  web3           - web3 instance
+  sign-tx-params - Parameters of transaction
+                   See `(send-transaction!)`
+  private-key    - Private key to sign the transaction with
+  callback-fn    - callback with two parameters, error and result
+
+  Returns signed transaction data."
+  [web3 & [sign-tx-params private-key signed-tx :as args]]
+  (oapply (eth web3) "signTransaction" args))
+
+
+(defn call!
+  "Executes a message call transaction, which is directly executed in the VM of
+  the node, but never mined into the blockchain.
+
+  Parameters:
+  web3          - web3 instance
+  call-object   - A transaction object see web3.eth.sendTransaction, with the
+                  difference that for calls the from property is optional as
+                  well.
+  default-block - If you pass this parameter it will not use the default block
+                  set with set-default-block.
+  callback-fn   - callback with two parameters, error and result
+
+  Returns the returned data of the call as string, e.g. a codes functions return
+  value.
+
+  Example:
+  user> `(call! web3-instance {:to   \"0x\"
+                               :data \"0x\"}
+                (fn [err res] (when-not err (println res))))`
+  nil
+  user> 0x"
+  [web3 & [call-object default-block :as args]]
+  (oapply (eth web3) "call" args))
+
+
+(defn estimate-gas
+
+  "Executes a message call or transaction, which is directly executed in the VM
+  of the node, but never mined into the blockchain and returns the amount of the
+  gas used.
+
+  Parameters:
+  web3          - web3 instance
+  call-object   - See `(send-transaction!)`, except that all properties are
+                  optional.
+  callback-fn   - callback with two parameters, error and result
+
+  Returns the used gas for the simulated call/transaction.
+
+  Example:
+  user> `(estimate-gas web3-instance
+           {:to   \"0x135a7de83802408321b74c322f8558db1679ac20\",
+            :data \"0x135a7de83802408321b74c322f8558db1679ac20\"}
+           (fn [err res] (when-not err (println res))))`
+  nil
+  user> 22361"
+  [web3 & [call-object :as args]]
+
+  (oapply (eth web3) "estimateGas" args))
+
+
+(defn filter
+  "Parameters:
+
+  Important: filter functionality is deprecated
+
+  web3          - web3 instance
+  block-or-transaction  - The string \"latest\" or \"pending\" to watch
+                          for changes in the latest block or pending
+                          transactions respectively. Or a filter options
+                          object as follows:
+
+    from-block: Number|String - The number of the earliest block (latest may be
+                                given to mean the most recent and pending
+                                currently mining, block). By default
+                               latest.
+    to-block: Number|String   - The number of the latest block (latest may be
+                                given to mean the most recent and pending
+                                currently mining, block). By default latest.
+
+    address: String           - An address or a list of addresses to only get
+                                logs from particular account(s).
+
+    :topics: Array of Strings - An array of values which must each appear in the
+                                log entries. The order is important, if you want
+                                to leave topics out use null, e.g.
+                                `[null, '0x00...']`. You can also pass another array
+                                for each topic with options for that topic e.g.
+                                `[null, ['option1', 'option2']]`
+
+  Watch callback return value
+
+    String - When using the \"latest\" parameter, it returns the block hash of
+             the last incoming block.
+
+    String - When using the \"pending\" parameter, it returns a transaction hash
+             of the most recent pending transaction.
+    Object - When using manual filter options, it returns a log object as follows:
+
+        logIndex: Number - integer of the log index position in the block. null
+                           when its pending log.
+        transactionIndex: Number - integer of the transactions index position log
+                                   was created from. null when its pending log.
+        transactionHash: String, 32 Bytes - hash of the transactions this log was
+                                            created from. null when its pending log.
+        blockHash: String, 32 Bytes - hash of the block where this log was in. null
+                                      when its pending. null when its pending log.
+        blockNumber: Number - the block number where this log was in. null when its
+                              pending. null when its pending log.
+        address: String, 32 Bytes - address from which this log originated.
+        data: String - contains one or more 32 Bytes non-indexed arguments of the log.
+
+        topics: Array of Strings - Array of 0 to 4 32 Bytes DATA of indexed log
+                                   arguments. (In solidity: The first topic is the hash
+                                   of the signature of the event, except if you declared the
+                                   event with the anonymous specifier.)
+
+  Note for event filter return values see Contract Events at
+  https://github.com/ethereum/wiki/wiki/JavaScript-API#contract-events"
+  [web3 & args]
+  (let [simple-from? (string? (first args))]
+    (if simple-from?
+      (get-past-logs {:from-block (first args)} (second args))
+      (get-past-logs (first args) (second args)))))
+
+(defn extend [web3 & args] (oapply (eth web3) "extend" args))
