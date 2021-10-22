@@ -6,4 +6,5 @@ resources/public/contracts/build/
 node_modules/
 target/
 tests-output/
+browser-tests-output/
 .lein-failures
