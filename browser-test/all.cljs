@@ -1,18 +1,23 @@
-(ns browser-test.all
-  (:require [cljs.core.async :refer [<! >! chan]]
-            [cljs-web3.core :as web3]
-            [cljs-web3.db :as web3-db]
-            [cljs-web3.eth :as web3-eth]
-            [cljs-web3.net :as web3-net]
-            [cljs-web3.personal :as web3-personal]
-            [cljs-web3.settings :as web3-settings]
-            [cljs-web3.shh :as web3-shh]
-            [cljs.test :refer-macros [deftest is testing run-tests use-fixtures async]]
-            [cljsjs.web3]
-            [print.foo :include-macros true])
-  (:require-macros [cljs.core.async.macros :refer [go]]))
+(ns tests.web3-tests
+  (:require-macros [cljs.test :refer [deftest testing is async]]
+                   [cljs.core.async.macros :refer [go]])
+  (:require [cljs.test :as t]
+            [tests.macros :refer [slurpit]]
+            [cljs-web3-next.core :as web3-core]
+            [cljs-web3-next.eth :as web3-eth]
+            [cljs-web3-next.utils :as web3-utils]
+            [cljs-web3-next.helpers :as web3-helpers]
+            [cljs-web3-next.personal :as web3-personal]
+            [cljs.nodejs :as nodejs]
+            [clojure.string :as string]
+            [oops.core :refer [ocall oget oset! oapply+]]
+            [cljs.core.async :refer [<!]]
+            [tests.smart-contracts-test :refer [smart-contracts]]
+            [district.shared.async-helpers :as async-helpers]))
 
-(def w3 (web3/create-web3 "http://localhost:8549/"))
+(async-helpers/extend-promises-as-channels!)
+
+(def w3 (web3-core/create-web3 "ws://127.0.0.1:9545"))
 (def gas-limit 4500000)
 
 (def contract-source "
