@@ -1,4 +1,4 @@
-(ns tests.web3-tests
+(ns browser-test.all
   (:require-macros [cljs.test :refer [deftest testing is async]]
                    [cljs.core.async.macros :refer [go]])
   (:require [cljs.test :as t]
@@ -16,6 +16,8 @@
             [district.shared.async-helpers :as async-helpers]))
 
 (async-helpers/extend-promises-as-channels!)
+
+#_(def abi (oget (js/JSON.parse (slurpit "./resources/public/contracts/build/MyContract.json")) "abi"))
 
 (def w3 (web3-core/create-web3 "ws://127.0.0.1:9545"))
 (def gas-limit 4500000)
