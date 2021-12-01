@@ -55,8 +55,8 @@
 
   :cljsbuild {:builds [{:id "tests"
                         :source-paths ["src" "browser-test"]
-                        :compiler {:output-to "tests-output/tests.js"
-                                   :output-dir "tests-output"
+                        :compiler {:output-to "browser-tests-output/tests.js"
+                                   :output-dir "browser-tests-output"
                                    :main "browser-test.runner"
                                    :optimizations :none}}
                        {:id "nodejs-tests"
