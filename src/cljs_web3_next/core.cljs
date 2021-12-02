@@ -1,10 +1,15 @@
 (ns cljs-web3-next.core
-  (:require [cljs.nodejs :as nodejs]
+  (:require [cljs.env :refer [*compiler*]]
             [oops.core :refer [ocall ocall+ oget oget+ gget]]
             [cljs-web3-next.utils :as utils]
             [cljs-web3-next.helpers :as web3-helpers]))
 
-(def Web3 (nodejs/require "web3"))
+
+(defn- nodejs-target?
+  []
+  (= :nodejs (get-in *compiler* [:options :target])))
+
+(def Web3 (if (nodejs-target?) (js/require "web3") js/Web3))
 
 ;; reconsider http-provider args with <1.5.2 web3
 (defn http-provider
