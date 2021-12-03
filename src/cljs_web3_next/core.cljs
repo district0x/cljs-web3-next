@@ -1,5 +1,6 @@
 (ns cljs-web3-next.core
   (:require [cljs.env :refer [*compiler*]]
+            [cljs.js :as cljs]
             [oops.core :refer [ocall ocall+ oget oget+ gget]]
             [cljs-web3-next.utils :as utils]
             [cljs-web3-next.helpers :as web3-helpers]))
