@@ -531,6 +531,11 @@ npx truffle migrate --network ganache
 lein doo node "nodejs-tests" once
 ```
 
+### compile webpack
+```bash
+npx webpack
+```
+
 #### compile cljs and run browser tests
 ```bash
 lein doo chrome "tests" once
