@@ -25,8 +25,8 @@
 
 (defn get-web3-provider [in-browser?]
   (if in-browser?
-(web3-core/ws-provider "ws://d0x-vm:8549")
-    (web3-core/ws-provider "ws://d0x-vm:8549")))
+(web3-core/ws-provider "ws://localhost:8549")
+    (web3-core/ws-provider "ws://localhost:8549")))
 
 (deftest test-web3 []
   (let [provider (get-web3-provider (running-in-browser?))
