@@ -29,14 +29,21 @@
 (defn encode-abi [contract-instance method args]
   (js-invoke (oapply+ (oget contract-instance "methods") (web3-helpers/camel-case (name method)) (clj->js args)) "encodeABI"))
 
-(defn contract-call [contract-instance method args opts]
-  (ocall (oapply+ (oget contract-instance "methods") (web3-helpers/camel-case (name method)) (clj->js args)) "call" (clj->js opts)))
+(defn contract-call
+  ([contract-instance method args opts]
+   (contract-call contract-instance method args opts (fn [err res])))
+  ([contract-instance method args opts callback]
+   (let [web3-contract-method (oapply+ (oget contract-instance "methods") (web3-helpers/camel-case (name method)) (clj->js args))]
+     (ocall web3-contract-method "call" (clj->js opts) callback))))
 
-(defn contract-send [contract-instance method args opts]
-  (ocall (oapply+ (oget contract-instance "methods") (web3-helpers/camel-case (name method)) (clj->js args)) "send" (clj->js opts)))
+(defn contract-send [contract-instance method args opts & [callback]]
+  (let [callback (or callback (fn [_err _res]))]
+    (ocall (oapply+ (oget contract-instance "methods") (web3-helpers/camel-case (name method)) (clj->js args)) "send" (clj->js opts) callback)))
 
 (defn subscribe-events [contract-instance event opts & [callback]]
-  (ocall+ (oget contract-instance "events") (web3-helpers/camel-case (name event)) (remove nil? [(web3-helpers/cljkk->js opts) callback])))
+  (oapply+ (oget contract-instance "events")
+           (web3-helpers/camel-case (name event)) ; https://web3js.readthedocs.io/en/v1.7.1/web3-eth-contract.html#contract-events
+           [contract-instance (web3-helpers/cljkk->js opts) callback]))
 
 (defn subscribe-logs [provider opts & [callback]]
   (js-invoke (aget provider "eth") "subscribe" "logs" (web3-helpers/cljkk->js opts) callback))
@@ -885,7 +892,7 @@
   [web3 & args]
   (let [simple-from? (string? (first args))]
     (if simple-from?
-      (get-past-logs {:from-block (first args)} (second args))
-      (get-past-logs (first args) (second args)))))
+      (get-past-logs web3 {:from-block (first args) :topics [nil]} (second args))
+      (get-past-logs web3 (first args) (second args)))))
 
 (defn extend [web3 & args] (oapply (eth web3) "extend" args))

@@ -1,4 +1,4 @@
 (ns tests.smart-contracts-test)
 
 (def smart-contracts
-  {:my-contract {:name "MyContract" :address "0x4DDDC882943dbf39CAC88daf01dC084ee65F1Ddd"} :forwarder {:name "Forwarder" :address "0xcEbe4c7537dd5c469c2486C9930A9ee3b98EDd33" :forwards-to :my-contract}})
+  {:my-contract {:name "MyContract" :address "0x555384605D2B6c71bE931B6e649baE1c4981AAad"} :forwarder {:name "Forwarder" :address "0xbdd338A8C6b2b3A7F1439f67fdfDbfa914170A74" :forwards-to :my-contract}})

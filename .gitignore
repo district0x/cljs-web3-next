@@ -8,3 +8,8 @@ target/
 tests-output/
 browser-tests-output/
 .lein-failures
+out
+yarn-error.log
+.shadow-cljs
+.cpcache
+Session.vim*
