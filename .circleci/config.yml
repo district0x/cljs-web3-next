@@ -5,7 +5,10 @@ jobs:
     working_directory: ~/ci
     docker:
       # Primary container image where all steps run.
-      - image: ghcr.io/district0x/cljs-web3-ci:latest
+      - image: 487920318758.dkr.ecr.us-west-2.amazonaws.com/cljs-web3-ci:latest
+        aws_auth:
+            aws_access_key_id: $AWS_ACCESS_KEY_ID
+            aws_secret_access_key: $AWS_SECRET_ACCESS_KEY
       # Secondary container image on common network.
       - image: trufflesuite/ganache-cli:latest
         command: [-d, -m district0x, -p 8549, -l 8000000]
