@@ -5,7 +5,7 @@ jobs:
     working_directory: ~/ci
     docker:
       # Primary container image where all steps run.
-      - image: cimg/clojure:1.10.3-browsers
+      - image: ghcr.io/district0x/cljs-web3-ci:latest
       # Secondary container image on common network.
       - image: trufflesuite/ganache-cli:latest
         command: [-d, -m district0x, -p 8549, -l 8000000]
