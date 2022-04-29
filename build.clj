@@ -2,9 +2,8 @@
   (:require [clojure.tools.build.api :as b]
             [deps-deploy.deps-deploy :as dd]))
 
-(def lib 'is.mad/cljs-web3-next) ; ends up as <group-id>/<artifact-id> in pom.xml
-; (def version (format "1.2.%s" (b/git-count-revs nil)))
-(def version "0.0.2")
+(def lib 'district0x/cljs-web3-next) ; ends up as <group-id>/<artifact-id> in pom.xml
+(def version "0.2.0")
 (def class-dir "target/classes")
 (def basis (b/create-basis {:project "deps.edn"}))
 (def jar-file (format "target/%s-%s.jar" (name lib) version))
