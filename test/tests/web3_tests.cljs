@@ -7,18 +7,30 @@
             [cljs-web3-next.eth :as web3-eth]
             [cljs-web3-next.utils :as web3-utils]
             [cljs-web3-next.helpers :as web3-helpers]
-            [cljs.nodejs :as nodejs]
+            [cljs-web3-next.personal :as web3-personal]
+            ; [cljs.nodejs :as nodejs] ; caused loading error `ReferenceError: require is not defined`
             [clojure.string :as string]
-            [cljs.core.async :refer [<!]]
+            [oops.core :refer [ocall oget oset! oapply+]]
+            [cljs.core.async :refer [<! chan put! timeout]]
             [tests.smart-contracts-test :refer [smart-contracts]]
-            [district.shared.async-helpers :as async-helpers]))
+            [district.shared.async-helpers :as async-helpers]
+            ["web3" :as Web3]))
 
 (async-helpers/extend-promises-as-channels!)
 
-(def abi (aget (js/JSON.parse (slurpit "./resources/public/contracts/build/MyContract.json")) "abi"))
+(def abi (oget (js/JSON.parse (slurpit "./resources/public/contracts/build/MyContract.json")) "abi"))
+
+(defn running-in-browser? []
+  (and (exists? js/window) (exists? js/document))) ; Based on https://github.com/flexdinesh/browser-or-node/blob/master/src/index.js#L2
+
+(defn get-web3-provider [in-browser?]
+  (if in-browser?
+(web3-core/ws-provider "ws://localhost:8549")
+    (web3-core/ws-provider "ws://localhost:8549")))
 
 (deftest test-web3 []
-  (let [web3 (web3-core/websocket-provider "ws://127.0.0.1:8545")]
+  (let [provider (get-web3-provider (running-in-browser?))
+        web3 (new Web3 provider)]
     (async done
            (go
              (let [connected? (<! (web3-eth/is-listening? web3))
@@ -28,49 +40,36 @@
                    address (-> smart-contracts :my-contract :address)
                    my-contract (web3-eth/contract-at web3 abi address)
                    event-interface (web3-helpers/event-interface my-contract :SetCounterEvent)
-                   event-emitter (-> (web3-eth/subscribe-events my-contract
-                                                                :SetCounterEvent
-                                                                {:from-block (inc block-number)}
-                                                                (fn [_ event]
-                                                                  (let [return-values (aget event "returnValues")
-                                                                        evt-values (web3-helpers/return-values->clj return-values event-interface)]
-                                                                    (is (= "3" (:new-value evt-values))))))
-                                     (#(web3-eth/on % :connected (fn [sub-id]
-                                                                        (is (int? sub-id)))))
-                                     (#(web3-eth/on % :data (fn [event]
-                                                                   (is (= "3" (:new-value (web3-helpers/return-values->clj (aget event "returnValues") event-interface))))))))
+
+                   event-emitter (web3-eth/subscribe-events my-contract :SetCounterEvent {:from-block (inc block-number)})
+                   connected-chan (timeout 1000)
+                   _ (web3-eth/on event-emitter :connected (fn [sub-id] (put! connected-chan sub-id) ))
+                   _ (is (not (nil? (<! connected-chan))))
+
+                   _ (web3-eth/on event-emitter :data (fn [event]
+                                                        (is (= "3" (:new-value (web3-helpers/return-values->clj (aget event "returnValues") event-interface))))))
+
                    event-signature (:signature event-interface)
-                   event-log-emitter (web3-eth/subscribe-logs web3
-                                                              {:address [address]
-                                                               :topics [event-signature]
-                                                               :from-block (inc block-number)}
-                                                              (fn [_ event]
-                                                                (let [return-values (web3-eth/decode-log web3 (:inputs event-interface) (aget event "data") [event-signature])
-                                                                      evt-values (web3-helpers/return-values->clj return-values event-interface)]
-                                                                  (is (= "3" (:new-value evt-values))))))
-                   tx (<! (web3-eth/contract-send my-contract
-                                                  :set-counter
-                                                  [3]
-                                                  {:from (first accounts)
-                                                   :gas 4000000}))
-                   seven (<! (web3-eth/contract-call my-contract
-                                                     :my-plus
-                                                     [3 4]
-                                                     {:from (first accounts)}))
+                   event-log-emitter (web3-eth/subscribe-logs
+                                      web3
+                                      {:address [address]
+                                       :topics [event-signature]
+                                       :from-block (inc block-number)}
+                                      (fn [_ event]
+                                        (let [return-values (web3-eth/decode-log web3 (:inputs event-interface) (oget event "data") [event-signature])
+                                              evt-values (web3-helpers/return-values->clj return-values event-interface)]
+                                          (is (= "3" (:new-value evt-values))))))
+                   tx (<! (web3-eth/contract-send my-contract :set-counter [3] {:from (first accounts) :gas 4000000}))
+                   _ (is (not (= (type tx) js/Error)) tx)
+                   seven (<! (web3-eth/contract-call my-contract :my-plus [3 4] {:from (first accounts)}))
                    tx-receipt (<! (web3-eth/get-transaction-receipt web3 (aget tx "transactionHash")))
-                   past-events (<! (web3-eth/get-past-events my-contract
-                                                             :SetCounterEvent
-                                                             {:from-block 0
-                                                              :to-block "latest"}))
-                   past-logs (<! (web3-eth/get-past-logs web3
-                                                         {:address [address]
-                                                          :topics [event-signature]
-                                                          :from-block 0
-                                                          :to-block "latest"}))]
+                   past-events (<! (web3-eth/get-past-events my-contract :SetCounterEvent {:from-block 0 :to-block "latest"}))
+                   past-logs (<! (web3-eth/get-past-logs web3 {:address [address] :topics [event-signature] :from-block block-number :to-block "latest"}))]
+
 
                (is (= "7" seven))
                (is (= "0x8bb5d9c30000000000000000000000000000000000000000000000000000000000000003" (web3-eth/encode-abi my-contract :set-counter [3])))
-               (is (= address (string/lower-case (aget my-contract "_address"))))
+               (is (= (string/lower-case address) (string/lower-case (aget my-contract "_address"))))
                (is (aget tx-receipt "status"))
                (is connected?)
                (is (= 10 (count accounts)))

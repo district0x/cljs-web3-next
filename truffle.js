@@ -8,10 +8,15 @@ module.exports = {
   networks: {
     ganache: {
       host: 'localhost',
-      port: 8545,
+      port: 8549,
       gas: 6e6, // gas limit
       gasPrice: 20e9, // 20 gwei, default for ganache
       network_id: '*'
+    }
+  },
+  compilers: {
+    solc: {
+      version: "0.4.23"
     }
   }
 };
