@@ -31,15 +31,20 @@ jobs:
       - run: CHROME_BIN=`which chromium-browser` npx karma start karma.conf.js --single-run
 
   deploy:
-   machine: true
-   steps:
-     - checkout
-     - run:
-         name: Build JAR
-         command: clj -T:build jar
-     - run:
-         name: Release to clojars
-         command: clj -T:build deploy
+    working_directory: ~/ci
+      docker:
+        - image: 487920318758.dkr.ecr.us-west-2.amazonaws.com/cljs-web3-ci:latest
+          aws_auth:
+              aws_access_key_id: $AWS_ACCESS_KEY_ID
+              aws_secret_access_key: $AWS_SECRET_ACCESS_KEY
+      steps:
+        - checkout
+        - run:
+            name: Build JAR
+            command: clj -T:build jar
+        - run:
+            name: Release to clojars
+            command: clj -T:build deploy
 
 workflows:
   version: 2
@@ -51,4 +56,4 @@ workflows:
             - test
           filters:
             branches:
-              only: master
+              only: fix_deployment
