@@ -34,6 +34,7 @@ jobs:
     working_directory: ~/ci
     docker:
       - image: 487920318758.dkr.ecr.us-west-2.amazonaws.com/cljs-web3-ci:latest
+        tty: true
         aws_auth:
             aws_access_key_id: $AWS_ACCESS_KEY_ID
             aws_secret_access_key: $AWS_SECRET_ACCESS_KEY
