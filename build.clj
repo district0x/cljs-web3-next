@@ -3,7 +3,7 @@
             [deps-deploy.deps-deploy :as dd]))
 
 (def lib 'io.github.district0x/cljs-web3-next) ; ends up as <group-id>/<artifact-id> in pom.xml
-(def version "0.2.0")
+(def version "0.2.0-SNAPSHOT")
 (def class-dir "target/classes")
 (def basis (b/create-basis {:project "deps.edn"}))
 (def jar-file (format "target/%s-%s.jar" (name lib) version))
