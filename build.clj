@@ -2,7 +2,7 @@
   (:require [clojure.tools.build.api :as b]
             [deps-deploy.deps-deploy :as dd]))
 
-(def lib 'district0x/cljs-web3-next) ; ends up as <group-id>/<artifact-id> in pom.xml
+(def lib 'io.github.district0x/cljs-web3-next) ; ends up as <group-id>/<artifact-id> in pom.xml
 (def version "0.2.0")
 (def class-dir "target/classes")
 (def basis (b/create-basis {:project "deps.edn"}))

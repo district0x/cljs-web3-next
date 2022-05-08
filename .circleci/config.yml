@@ -57,4 +57,4 @@ workflows:
             - test
           filters:
             branches:
-              only: fix_deployment
+              only: master
