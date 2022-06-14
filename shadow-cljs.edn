@@ -2,6 +2,7 @@
  :dev-http {6502 {:root "out/browser-tests" :host "d0x-vm"}}
  :nrepl {:port 30333}
  :deps {:aliases [:dev]}
+ :npm-deps {:install true}
  :builds
  {:test-node {:target :node-test
          :ns-regexp "-tests$"
