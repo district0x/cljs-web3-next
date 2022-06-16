@@ -15,10 +15,9 @@
 
 ; (def Web3 (if (nodejs-target?) (js/require "web3") js/Web3))
 
-;; reconsider http-provider args with <1.5.2 web3
 (defn http-provider
   ([uri] (http-provider uri Web3))
-  ([uri web3] (new web3 (new (aget web3 "providers" "HttpProvider") uri))))
+  ([uri web3-library] (new web3-library (new web3-library (aget web3-library "providers" "HttpProvider") uri))))
 
 (defn websocket-provider [uri opts]
   (new Web3 (new (aget Web3 "providers" "WebsocketProvider") uri (web3-helpers/cljkk->js opts))))
@@ -376,15 +375,19 @@
     (constructor. uri)))
 
 (defn create-web3
-  "Creates a web3 instance using an `http-provider`.
+  "Creates a web3 instance using given provider or from URL using appropriate provider
+   based on the URL (ws:// or http_://).
 
   Parameters:
-  url  - The URL string for which to create the provider.
-  Web3 - (Optional first argument) Web3 JavaScript object
-
-  Example:
-  user> `(create-web3 \"http://localhost:8545/\")`
-  <web3 instance>"
-  ([url] (create-web3 (default-web3) url))
-  ([Web3 url]
-   (new Web3 (http-provider Web3 url))))
+  url           - The URL string for which to create the provider.
+  web3-provider - instance of https://web3js.readthedocs.io/en/v1.7.3/web3-eth.html#providers
+                  Normally this would be the `window.ethereum` (injected by MetaMask, after user
+                  has authorized it)
+  "
+  ([url]
+   (create-web3 (default-web3) url))
+  ([url provider]
+   (cond
+     (not (nil? provider)) (new Web3 provider)
+     (clojure.string/starts-with? "http" url) (http-provider url)
+     (clojure.string/starts-with? "ws" url) (ws-provider url))))

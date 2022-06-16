@@ -50,6 +50,7 @@
                                                         (is (= "3" (:new-value (web3-helpers/return-values->clj (aget event "returnValues") event-interface))))))
 
                    event-signature (:signature event-interface)
+                   initial-logs (<! (web3-eth/get-past-logs web3 {:address [address] :topics [event-signature] :from-block block-number :to-block "latest"}))
                    event-log-emitter (web3-eth/subscribe-logs
                                       web3
                                       {:address [address]
@@ -64,7 +65,8 @@
                    seven (<! (web3-eth/contract-call my-contract :my-plus [3 4] {:from (first accounts)}))
                    tx-receipt (<! (web3-eth/get-transaction-receipt web3 (aget tx "transactionHash")))
                    past-events (<! (web3-eth/get-past-events my-contract :SetCounterEvent {:from-block 0 :to-block "latest"}))
-                   past-logs (<! (web3-eth/get-past-logs web3 {:address [address] :topics [event-signature] :from-block block-number :to-block "latest"}))]
+                   final-logs (<! (web3-eth/get-past-logs web3 {:address [address] :topics [event-signature] :from-block block-number :to-block "latest"}))
+                   new-logs (- (count final-logs) (count initial-logs))]
 
 
                (is (= "7" seven))
@@ -76,7 +78,7 @@
                (is (int? block-number))
                (is (map? block))
                (is (= "3" (:new-value (web3-helpers/return-values->clj (aget past-events "0" "returnValues") event-interface))))
-               (is (= 1 (count past-logs)))
+               (is (= 1 new-logs))
 
                (web3-eth/unsubscribe event-emitter)
                (web3-eth/unsubscribe event-log-emitter)
