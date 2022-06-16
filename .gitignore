@@ -13,3 +13,5 @@ yarn-error.log
 .shadow-cljs
 .cpcache
 Session.vim*
+browser-tests-output
+.shadow-cljs
