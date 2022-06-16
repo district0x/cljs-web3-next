@@ -612,35 +612,40 @@
   web3             - web3 instance
   abi              - ABI array with descriptions of functions and events of
                      the contract
-  transaction-data - map that contains
-    - :gas - max gas to use
+  options          - map that contains
     - :data the BIN of the contract
+    - :arguments list of arguments for the contract constructor
+  tx-opts - map that contains
+    - :gas - max gas to use
     - :from account to use
   callback-fn      - callback with two parameters, error and contract.
-                     From the contract the \"address\" property can be used to
-                     obtain the address. And the \"transactionHash\" to obtain
-                     the hash of the transaction, which created the contract.
+                     Use (aget instance \"options\" \"address\") to
+                     obtain the address.
 
   Example:
   `(contract-new web3-instance
                  abi
+                 {:data bin
+                  :arguments [1 2 3]}
                  {:from \"0x..\"
-                  :data bin
                   :gas  4000000}
                  (fn [err contract]
                    (if-not err
-                    (let [address (aget contract \"address\")
-                          tx-hash (aget contract \"transactionHash\")]
-                      ;; Two calls: transaction received
-                      ;; and contract deployed.
-                      ;; Check address on the second call
-                      (when (address? address)
-                        (do-something-with-contract contract)
-                        (do-something-with-address address)))
+                    (let [address (aget contract \"options\" \"address\")]
+                      (do-something-with-contract contract)
+                      (do-something-with-address address))
                     (println \"error deploying contract\" err))))`
    nil"
-  [web3 abi & [transaction-data callback-fn :as args]]
-  (oapply+ (contract web3 abi) "deploy" args))
+  [web3 abi options tx-opts & [callback]]
+  (let [noop-callback (fn [_err _res])
+        callback (or callback noop-callback)]
+    (try
+      (let [contract-obj (oapply+ (contract web3 abi) "deploy" [(clj->js options)])
+            transaction (ocall contract-obj "send" (clj->js tx-opts))]
+        (.then transaction
+          (fn [res] (callback nil res))
+          (fn [err] (callback err nil))))
+      (catch :default err (callback err nil)))))
 
 (defn send-transaction!
   "Sends a transaction to the network.

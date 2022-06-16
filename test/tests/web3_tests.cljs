@@ -98,3 +98,29 @@
                       (web3-utils/address->checksum web3 "0x00dc857b6f66bf96154ff4541e4a2fe87e3db6fc")))
 
                (done))))))
+
+
+(deftest test-web3-utils
+  []
+  (is (= (web3-core/sha3 "Some string to be hashed")
+          "0xed973b234cf2238052c9ac87072c71bcf33abc1bbd721018e0cca448ef79b379"))
+  (is (= (web3-core/to-hex "foo") "0x666f6f"))
+  (is (= (web3-core/to-ascii "0x666f6f") "foo"))
+  (is (= (web3-core/from-ascii "ethereum") "0x657468657265756d"))
+  (is (= (web3-core/to-decimal "0x15") 21))
+  (is (= (web3-core/from-decimal 21) "0x15"))
+  (is (= (web3-core/from-wei "10" :ether) "0.00000000000000001"))
+  (is (= (web3-core/to-wei "10" :ether) "10000000000000000000"))
+  (is (= (str (web3-core/to-big-number "10000000000000000000")) "10000000000000000000"))
+  (is (= (web3-core/pad-left "foo" 8) "00000foo"))
+  (is (= (web3-core/pad-right "foo" 8 "b") "foobbbbb"))
+  (is (web3-core/address? "0x8888f1f195afa192cfee860698584c030f4c9db1"))
+  (is (not (web3-core/address? "0x8888F1f195afa192cfee860698584c030f4c9db1")))
+
+  (let [provider (get-web3-provider (running-in-browser?))
+     web3 (new Web3 provider)]
+    (is (= (web3-utils/solidity-sha3 web3 "Some string to be hashed")
+          "0xed973b234cf2238052c9ac87072c71bcf33abc1bbd721018e0cca448ef79b379"))
+
+    (is (= (web3-utils/address->checksum web3 "0x8888f1f195afa192cfee860698584c030f4c9db1")
+          "0x8888f1F195AFa192CfeE860698584c030f4c9dB1"))))

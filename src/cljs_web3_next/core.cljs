@@ -147,21 +147,15 @@
 
   Parameters:
   string  - An ASCII string to be converted to HEX.
-  padding - (optional) The number of bytes the returned HEX string should have.
   Web3    - (optional first argument) Web3 JavaScript object.
 
   Example:
   user> `(from-ascii \"ethereum\")`
   \"0x657468657265756d\"
-  user> `(from-ascii \"ethereum\")`
-  \"0x657468657265756d000000000000000000000000000000000000000000000000\"
-
-  NOTE: The latter is intended behaviour. Because of a bug in Web3 the padding
-        is not added. See https://github.com/ethereum/web3.js/issues/337"
-  ([string] (from-ascii string nil))
-  ([string padding] (from-ascii (default-web3)  string padding))
-  ([Web3 string padding]
-   (ocall+ Web3 "utils" "fromAscii" string padding)))
+  "
+  ([string] (from-ascii (default-web3) string))
+  ([Web3 string]
+   (ocall+ Web3 ["utils" "asciiToHex"] string)))
 
 
 (defn to-decimal
@@ -178,7 +172,7 @@
   21"
   ([hex-string] (to-decimal (default-web3) hex-string))
   ([Web3 hex-string]
-   (ocall+ Web3 "utils" "hexToNumber" hex-string)))
+   (ocall+ Web3 ["utils" "hexToNumber"] hex-string)))
 
 (defn from-decimal
   "Converts a number or number string to its HEX representation.
@@ -194,13 +188,13 @@
   \"0x15\""
   ([number] (from-decimal (default-web3)  number))
   ([Web3 number]
-   (ocall+ Web3 "utils" "numberToHex" number)))
+   (ocall+ Web3 ["utils" "numberToHex"] number)))
 
 (defn from-wei
   "Converts a number of Wei into an Ethereum unit.
 
   Parameters:
-  number - A number or BigNumber instance.
+  number - A string or BigNumber instance.
   unit   - One of :noether :wei :kwei :Kwei :babbage :femtoether :mwei :Mwei
            :lovelace :picoether :gwei :Gwei :shannon :nanoether :nano :szabo
            :microether :micro :finney :milliether :milli :ether :kether :grand
@@ -211,17 +205,17 @@
   given number parameter.
 
   Example:
-  user> `(web3/from-wei 10 :ether)`
+  user> `(web3/from-wei \"10\" :ether)`
   \"0.00000000000000001\""
   ([number unit] (from-wei (default-web3) number unit))
   ([Web3 number unit]
-   (ocall+ Web3 "utils" "fromWei" number (name unit))))
+   (ocall+ Web3 ["utils" "fromWei"] number (name unit))))
 
 (defn to-wei
   "Converts an Ethereum unit into Wei.
 
   Parameters:
-  number - A number or BigNumber instance.
+  number - A string or BigNumber instance.
   unit   - One of :noether :wei :kwei :Kwei :babbage :femtoether :mwei :Mwei
            :lovelace :picoether :gwei :Gwei :shannon :nanoether :nano :szabo
            :microether :micro :finney :milliether :milli :ether :kether :grand
@@ -232,11 +226,11 @@
   given number parameter.
 
   Example:
-  user> `(web3/to-wei 10 :ether)`
+  user> `(web3/to-wei \"10\" :ether)`
   \"10000000000000000000\""
   ([number unit] (to-wei (default-web3) number unit))
   ([Web3 number unit]
-   (ocall+ Web3 "utils" "toWei" number (name unit))))
+   (ocall+ Web3 ["utils" "toWei"] number (name unit))))
 
 (defn to-big-number
   "Converts a given number into a BigNumber instance.
@@ -244,7 +238,7 @@
   renamed to toBN in 1.0
 
   Parameters:
-  number-or-hex-string - A number, number string or HEX string of a number.
+  number-or-hex-string - A number string or HEX string of a number.
   Web3                 - (optional first argument) Web3 JavaScript object.
 
   Example:
@@ -252,7 +246,7 @@
   <An instance of BigNumber>"
   ([number-or-hex-string] (to-big-number (default-web3) number-or-hex-string))
   ([Web3 number-or-hex-string]
-   (ocall+ Web3 "utils" "toBN" number-or-hex-string)))
+   (ocall+ Web3 ["utils" "toBN"] number-or-hex-string)))
 
 (defn pad-left
   "Returns input string with zeroes or sign padded to the left.
@@ -272,7 +266,7 @@
   ([string chars] (pad-left string chars nil))
   ([string chars sign] (pad-left (default-web3) string chars sign))
   ([Web3 string chars sign]
-   (ocall+ Web3 "utils" "padLeft" string chars sign)))
+   (ocall+ Web3 ["utils" "padLeft"] string chars sign)))
 
 (defn pad-right
   "Returns input string with zeroes or sign padded to the right.
@@ -292,7 +286,7 @@
   ([string chars] (pad-right string chars nil))
   ([string chars sign] (pad-right (default-web3) string chars sign))
   ([Web3 string chars sign]
-   (ocall+ Web3 "utils" "padRight" string chars sign)))
+   (ocall+ Web3 ["utils" "padRight"] string chars sign)))
 
 (defn address?
   "Returns a boolean indicating if the given string is an address.
@@ -314,7 +308,7 @@
   false"
   ([address] (address? (default-web3) address))
   ([Web3 address]
-   (ocall+ Web3 "utils" "isAddress" [address])))
+   (ocall+ Web3 ["utils" "isAddress"] address)))
 
 (defn reset
   "Should be called to reset the state of web3. Resets everything except the manager.
