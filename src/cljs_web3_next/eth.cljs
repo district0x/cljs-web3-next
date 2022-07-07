@@ -12,8 +12,8 @@
 (defn get-transaction-receipt [provider tx-hash & [callback]]
   (oapply+ provider "eth.getTransactionReceipt" (remove nil? [tx-hash callback])))
 
-(defn accounts [provider]
-  (js-invoke (oget provider "eth") "getAccounts"))
+(defn accounts [provider & [callback]]
+  (oapply+ provider "eth.getAccounts" (remove nil? [callback])))
 
 ;; recheck conflicts with updated fn
 ;; (defn get-balance [provider address]
@@ -43,10 +43,13 @@
 (defn subscribe-events [contract-instance event opts & [callback]]
   (oapply+ (oget contract-instance "events")
            (web3-helpers/camel-case (name event)) ; https://web3js.readthedocs.io/en/v1.7.1/web3-eth-contract.html#contract-events
-           [contract-instance (web3-helpers/cljkk->js opts) callback]))
+           [(web3-helpers/cljkk->js opts) callback]))
 
 (defn subscribe-logs [provider opts & [callback]]
   (js-invoke (aget provider "eth") "subscribe" "logs" (web3-helpers/cljkk->js opts) callback))
+
+(defn subscribe-blocks [provider & [callback]]
+  (js-invoke (aget provider "eth") "subscribe" "newBlockHeaders" callback))
 
 (defn decode-log [provider abi data topics]
   (ocall+ provider "eth.abi.decodeLog" (clj->js abi) data (clj->js topics)))
@@ -296,7 +299,7 @@
                   set with set-default-block.
   callback-fn   - callback with two parameters, error and result
 
-  Returns a BigNumber instance of the current balance for the given address in
+  Returns a String of the current balance for the given address in
   wei.
 
   Example:
@@ -305,7 +308,7 @@
                       \"latest\"
                       (fn [err res] (when-not err (println res))))`
   nil
-  user> #object[e 1729597111000000000]"
+  user> \"1729597111000000000\""
   [provider & [address default-block :as args]]
   (oapply+ provider "eth" "getBalance" args))
 
@@ -688,8 +691,8 @@
           (fn [err res] (when-not err (println res))))
   nil
   user> 0x..."
-  [web3 & [transaction-object :as args]]
-  (oapply+ (eth web3) "sendTransaction" args))
+  [web3 transaction-object & [callback]]
+  (oapply+ (eth web3) "sendTransaction" (remove nil? [(clj->js transaction-object) callback])))
 
 
 (defn send-raw-transaction!
