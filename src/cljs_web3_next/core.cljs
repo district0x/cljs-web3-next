@@ -26,6 +26,9 @@
   ([uri] (ws-provider uri {}))
   ([uri opts] (websocket-provider uri opts)))
 
+(defn support-subscriptions? [provider]
+  (some? (aget provider "currentProvider" "on")))
+
 (defn connection-url [provider]
   (oget provider "currentProvider" "connection" "_url"))
 
