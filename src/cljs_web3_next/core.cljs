@@ -6,15 +6,6 @@
             [cljs-web3-next.utils :as utils]
             [cljs-web3-next.helpers :as web3-helpers]))
 
-
-(defn- nodejs-target?
-  []
-  (= :nodejs (get-in *compiler* [:options :target])))
-
-(println "node target? " (nodejs-target?))
-
-; (def Web3 (if (nodejs-target?) (js/require "web3") js/Web3))
-
 (defn http-provider
   ([uri] (http-provider uri Web3))
   ([uri web3-library] (new web3-library (new web3-library (aget web3-library "providers" "HttpProvider") uri))))
@@ -32,21 +23,28 @@
 (defn extend [provider property methods]
   (ocall+ provider "extend" (web3-helpers/cljkk->js {:property property
                                                         :methods methods})))
-
 (defn connected? [provider]
-  (oget provider "currentProvider" "connected"))
+  (oget provider "currentProvider" "isConnected"))
 
 (defn disconnect [provider]
   (ocall (oget provider "currentProvider") "disconnect"))
 
+; MetaMask provider only offers 'connect' and 'disconnect' events
+; https://docs.metamask.io/guide/ethereum-provider.html#events
 (defn on-connect [provider & [callback]]
-  (ocall+ (oget provider "currentProvider") (remove nil? ["on" "connect" callback])))
+  (if (not (nil? callback)) (.on (oget provider "currentProvider") "connect" callback)))
 
+; MetaMask provider only offers 'connect' and 'disconnect' events
+; https://docs.metamask.io/guide/ethereum-provider.html#events
 (defn on-disconnect [provider & [callback]]
-  (ocall+ (oget provider "currentProvider") (remove nil? ["on" "end" callback])))
+  (if (not (nil? callback)) (.on (oget provider "currentProvider") "disconnect" callback)))
 
 (defn on-error [provider & [callback]]
-  (ocall+ (oget provider "currentProvider") (remove nil? ["on" "error" callback])))
+  ; Currently NOOP for backwards compatibility purposes, as Web3.js
+  ; doesn't offer this event on the provider or web3 instance
+  ; If it did, could be implemented as the following:
+  ; (.on (oget provider "currentProvider") "error" (or callback identity))
+  (oget provider "currentProvider"))
 
 ;; compatible API polyfills (proxies)
 

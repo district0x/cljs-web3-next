@@ -84,6 +84,10 @@
                (web3-eth/unsubscribe event-log-emitter)
                (web3-core/disconnect web3)
 
+               (is (some? (web3-core/on-connect web3 identity)) "Adding connect listener must succeed")
+               (is (some? (web3-core/on-disconnect web3 identity)) "Adding disconnect listener must succeed")
+               (is (some? (web3-core/on-error web3 identity)) "Adding error listener must succeed (does nothing)")
+
                (is (= "0xf652222313e28459528d920b65115c16c04f3efc82aaedc97be59f3f377c0d3f"
                       (web3-utils/solidity-sha3 web3 6)))
 

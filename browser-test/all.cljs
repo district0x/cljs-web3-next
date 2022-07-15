@@ -2,17 +2,14 @@
   (:require-macros [cljs.test :refer [deftest testing is async]]
                    [cljs.core.async.macros :refer [go]])
   (:require [cljs.test :as t]
- #_           [tests.macros :refer [slurpit]]
             [cljs-web3-next.core :as web3-core]
             [cljs-web3-next.eth :as web3-eth]
             [cljs-web3-next.utils :as web3-utils]
             [cljs-web3-next.helpers :as web3-helpers]
             [cljs-web3-next.personal :as web3-personal]
-  #_          [cljs.nodejs :as nodejs]
             [clojure.string :as string]
             [oops.core :refer [ocall oget oset! oapply+]]
             [cljs.core.async :refer [<!]]
-#_            [tests.smart-contracts-test :refer [smart-contracts]]
             [district.shared.async-helpers :as async-helpers]))
 
 (async-helpers/extend-promises-as-channels!)
