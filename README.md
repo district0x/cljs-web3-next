@@ -546,7 +546,10 @@ Additionally CI runs the tests slightly different way, so that's the 3rd test en
 ## CI (Headless Chrome, Karma)
 
 1. Build: `npx shadow-cljs compile test-ci`
-2. Tests: ```CHROME_BIN=`which chromium-browser` npx karma start karma.conf.js --single-run```
+2. Tests:
+    ```
+    CHROME_BIN=`which chromium-browser` npx karma start karma.conf.js --single-run
+    ```
 
 #### inspect on headless chrome on another chrome instance
 

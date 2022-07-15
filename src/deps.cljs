@@ -1,5 +1,6 @@
 {:npm-deps
- {"web3" "1.7.3"
+ {"web3" "1.7.3"}
+ :npm-dev-deps {
   "jsedn" "0.4.1"
   "karma" "^6.3.17"
   "karma-chrome-launcher" "^3.1.1"

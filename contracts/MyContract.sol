@@ -1,4 +1,5 @@
-pragma solidity ^0.4.18;
+// 	SPDX-License-Identifier: GPL-3.0-only
+pragma solidity ^0.8.0;
 
 contract MyContract {
 
@@ -9,11 +10,11 @@ contract MyContract {
   event SetCounterEvent(uint previousValue, uint newValue);
   /* event SpecialEvent(uint someParam); */
 
-  constructor(uint _counter) public {
+  constructor(uint _counter) {
     counter = _counter;
   }
 
-  function myPlus(uint a, uint b) public constant returns (uint) {
+  function myPlus(uint a, uint b) public pure returns (uint) {
     return a + b;
   }
 

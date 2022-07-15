@@ -5,7 +5,7 @@
  :npm-deps {:install true}
  :builds
  {:test-node {:target :node-test
-         :ns-regexp "-tests$"
+         :ns-regexp "tests.(.+)"
          :output-to "out/node-tests.js"
          :autorun false}
   :test-browser {:target :browser-test
