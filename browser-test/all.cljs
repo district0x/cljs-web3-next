@@ -20,7 +20,7 @@
 (def gas-limit 4500000)
 
 (def contract-source "
-  pragma solidity ^0.4.6;
+  pragma solidity ^0.8.0;
 
   contract test {
     function multiply(uint a) returns(uint d) {
