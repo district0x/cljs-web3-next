@@ -51,8 +51,10 @@ Latest released version of this library: <br>
   - [to-wei](#to-wei)
   - [address?](#address?)
 - [cljs-web3.evm](#evm)
-  - [increase-time](#increase-time)
-  - [mine-block](#mine-block)
+  - [increase-time!](#increase-time!)
+  - [mine-block!](#mine-block!)
+  - [snapshot!](#snapshot!)
+  - [revert!](#revert!)
 - [cljs-web3.helpers](#helpers)
   - [js->cljkk](#js->cljkk)
   - [cljkk->js](#cljkk->js)
@@ -458,17 +460,29 @@ Implementation of Solidity sha3 function. Takes a web3 provider and a variable n
 *NOTE* The functions in this namespaces are not a part of the API unless you [extend](#extend) the `evm` module with these RPC calls.
 They will only to work with a testrpc such as [ganache](https://www.trufflesuite.com/ganache)
 
-#### <a name="increase-time">`increase-time`
+#### <a name="increase-time!">`increase-time!`
 
-Increases the blockchain time by the specified numebr of seconds.
+Increases the blockchain time by the specified number of seconds.
 
-`(increase-time web3 seconds)`
+`(increase-time! web3 [seconds] callback)`
 
-#### <a name="mine-block">`mine-block`
+#### <a name="mine-block!">`mine-block!`
 
 Instantly mines a block.
 
-`(mine-block web3)`
+`(mine-block web3 callback)`
+
+#### <a name="snapshot!">`snapshot!`
+
+Snapshot the state of the blockchain at the current block.
+
+`(snapshot! web3 callback)`
+
+#### <a name="snapshot!">`revert!`
+
+Revert the state of the blockchain to a previous snapshot.
+
+`(revert! web3 [snapshot-id] callback)`
 
 ### <a name="helpers">`cljs-web3.helpers`
 

@@ -5,6 +5,7 @@
             [tests.macros :refer [slurpit]]
             [cljs-web3-next.core :as web3-core]
             [cljs-web3-next.eth :as web3-eth]
+            [cljs-web3-next.evm :as web3-evm]
             [cljs-web3-next.utils :as web3-utils]
             [cljs-web3-next.helpers :as web3-helpers]
             [cljs-web3-next.personal :as web3-personal]
@@ -130,3 +131,35 @@
 
     (is (= (web3-utils/address->checksum web3 "0x8888f1f195afa192cfee860698584c030f4c9db1")
           "0x8888f1F195AFa192CfeE860698584c030f4c9dB1"))))
+
+
+(deftest test-web3-evm
+  []
+  (let [provider (get-web3-provider (running-in-browser?))
+        web3 (new Web3 provider)]
+
+    (async done
+      (go
+        (let [block-number (<! (web3-eth/get-block-number web3))
+              block (js->clj (<! (web3-eth/get-block web3 block-number false)) :keywordize-keys true)]
+          (web3-evm/snapshot! web3
+            (fn [_err res]
+              (let [snapshot-id res]
+                (web3-evm/increase-time! web3 [3600]
+                  (fn [_err res]
+                    (is (>= res 3600))
+                    (web3-evm/mine-block! web3
+                      (fn [_err _res]
+                        (go
+                          (let [new-block-number (<! (web3-eth/get-block-number web3))
+                                new-block (js->clj (<! (web3-eth/get-block web3 new-block-number false)) :keywordize-keys true)]
+                            (is (= (inc block-number) new-block-number))
+                            (is (<= (+ 3600 (:timestamp block)) (:timestamp new-block)))
+                            (web3-evm/revert! web3 [snapshot-id]
+                              (fn [_err _res]
+                                (go
+                                  (let [new-block-number (<! (web3-eth/get-block-number web3))
+                                       new-block (js->clj (<! (web3-eth/get-block web3 new-block-number false)) :keywordize-keys true)]
+                                    (is (= block-number new-block-number))
+                                    (is (= (:timestamp block) (:timestamp new-block)))
+                                    (done)))))))))))))))))))
