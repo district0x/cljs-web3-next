@@ -19,6 +19,9 @@
 ;; (defn get-balance [provider address]
 ;;   (ocall provider "eth" "getBalance" address))
 
+(defn get-chain-id [provider & [callback]]
+  (oapply+ provider "eth.getChainId" (remove nil? [callback])))
+
 (defn get-block-number [provider & [callback]]
   (oapply+ provider "eth.getBlockNumber" (remove nil? [callback])))
 
