@@ -37,6 +37,7 @@
              (let [connected? (<! (web3-eth/is-listening? web3))
                    accounts (<! (web3-eth/accounts web3))
                    block-number (<! (web3-eth/get-block-number web3))
+                   chain-id (<! (web3-eth/get-chain-id web3))
                    block (js->clj (<! (web3-eth/get-block web3 block-number false)) :keywordize-keys true)
                    address (-> smart-contracts :my-contract :address)
                    my-contract (web3-eth/contract-at web3 abi address)
@@ -71,6 +72,7 @@
 
 
                (is (= "7" seven))
+               (is (= "1337" (str chain-id)))
                (is (= "0x8bb5d9c30000000000000000000000000000000000000000000000000000000000000003" (web3-eth/encode-abi my-contract :set-counter [3])))
                (is (= (string/lower-case address) (string/lower-case (aget my-contract "_address"))))
                (is (aget tx-receipt "status"))
