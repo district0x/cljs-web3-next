@@ -27,10 +27,13 @@
   (ocall+ provider "extend" (web3-helpers/cljkk->js {:property property
                                                         :methods methods})))
 (defn connected? [provider]
-  (oget provider "currentProvider" "isConnected"))
+  (oget provider "currentProvider" "connected"))
 
 (defn disconnect [provider]
   (ocall (oget provider "currentProvider") "disconnect"))
+
+(defn connect [provider]
+  (ocall (oget provider "currentProvider") "connect"))
 
 ; MetaMask provider only offers 'connect' and 'disconnect' events
 ; https://docs.metamask.io/guide/ethereum-provider.html#events
