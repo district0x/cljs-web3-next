@@ -60,7 +60,7 @@
 ;; 'undefined'
 
 (defn default-web3 []
-  (new Web3 (gget ".?web3.?currentProvider" )))
+  (new Web3 (or (gget ".?ethereum" ) (gget ".?web3.?currentProvider" ))))
 
 
 (def version-ethereum
