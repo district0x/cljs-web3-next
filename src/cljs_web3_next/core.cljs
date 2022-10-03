@@ -390,7 +390,7 @@
   "
   ([url]
    (create-web3 (default-web3) url))
-  ([url provider]
+  ([provider url]
    (cond
      (not (nil? provider)) (new Web3 provider)
      (clojure.string/starts-with? "http" url) (http-provider url)

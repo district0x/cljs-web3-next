@@ -325,6 +325,8 @@
   (unsubscribe filter (first args)))
 
 
+;; DEPRECATED
+;; Use (encode-abi ) instead
 (defn contract-get-data
   "Gets binary data of a contract method call.
 
@@ -341,11 +343,7 @@
   user> `(web3-eth/contract-call ContractInstance :multiply 5)`
   25"
   [contract-instance method & args]
-  (let [method-name (web3-helpers/camel-case (name method))
-        method-fn (oget+ contract-instance method-name)]
-    (if method-fn
-      (ocall method-fn "getData" args)
-      (throw (str "Method: " method-name " was not found in object.")))))
+  (encode-abi contract-instance method args))
 
 
 ;; DEPRECATED
