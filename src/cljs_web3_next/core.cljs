@@ -8,10 +8,19 @@
 
 (defn http-provider
   ([uri] (http-provider uri Web3))
-  ([uri web3-library] (new web3-library (new web3-library (aget web3-library "providers" "HttpProvider") uri))))
+  ([uri web3-library] (new web3-library (new (aget web3-library "providers" "HttpProvider") uri))))
 
-(defn websocket-provider [uri opts]
-  (new Web3 (new (aget Web3 "providers" "WebsocketProvider") uri (web3-helpers/cljkk->js opts))))
+(defn websocket-provider
+  "Docs:
+    @see https://github.com/web3/web3.js/tree/1.x/packages/web3-providers-ws#usage
+    @see https://github.com/theturtle32/WebSocket-Node/blob/v1.0.31/docs/WebSocketClient.md#client-config-options"
+  ([uri] (websocket-provider uri {} Web3))
+  ([uri opts] (websocket-provider uri {} Web3))
+  ([uri opts web3-library] (new web3-library
+                                (new
+                                  (aget web3-library "providers" "WebsocketProvider")
+                                  uri
+                                  (web3-helpers/cljkk->js opts)))))
 
 (defn ws-provider
   ([uri] (ws-provider uri {}))
@@ -393,5 +402,6 @@
   ([provider url]
    (cond
      (not (nil? provider)) (new Web3 provider)
-     (clojure.string/starts-with? "http" url) (http-provider url)
-     (clojure.string/starts-with? "ws" url) (ws-provider url))))
+     (clojure.string/starts-with? url "http" ) (new Web3 (http-provider url))
+     (clojure.string/starts-with? url "ws") (new Web3 (ws-provider url))
+     :else (throw (js/Error. (str "Failure creating web3 instance with provider: " provider " url: " url))))))
